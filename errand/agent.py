@@ -24,7 +24,7 @@ from .domain import AREAS, SERVICES, Approval, ErrandState, Intent, TurnResult, 
 from .interpreter import Interpreter
 from .llm.anthropic import AnthropicModel
 from .llm.base import Model
-from .llm.rules import YES
+from .llm.rules import YES, RuleModel
 from .memory import MemoryStore, label_for
 from .mock.provider import MockProvider
 from .provider_client import ProviderClient, Result
@@ -124,7 +124,7 @@ class AgentService:
         self.ids = ids
         self.gate = ApprovalGate(db, clock, ids, settings.approval_ttl_min)
         self.memory = MemoryStore(db, clock, ids)
-        self.interpreter = Interpreter(model)
+        self.interpreter = Interpreter(model, fallback=None if isinstance(model, RuleModel) else RuleModel())
         self.model = model
         self.review_model = model if isinstance(model, AnthropicModel) else None
         self.tracer = Tracer(trace_dir, clock, settings.trace_capture_content)
@@ -194,7 +194,13 @@ class AgentService:
         if via_button:
             intent = Intent(kind=inp.kind)
         else:
-            intent = self.interpreter.interpret(ctx, self._context(ctx), inp.text)
+            with ctx.step("Reading your message") as st:
+                intent = self.interpreter.interpret(ctx, self._context(ctx), inp.text)
+                detail = {"intent": intent.to_dict(), "model": getattr(self.model, "name", "?")}
+                if intent.kind == "unclear":
+                    st.warn("Couldn’t understand that", detail=detail)
+                else:
+                    st.done(_intent_label(intent), detail=detail)
         s.unclear_streak = s.unclear_streak + 1 if intent.kind == "unclear" else 0
         handler = getattr(self, f"_on_{intent.kind}")
         handler(ctx, intent, inp, via_button)
@@ -891,7 +897,8 @@ class AgentService:
                     st.done("The provider accepted the booking", detail={**detail, "result": res.value})
                 elif res.error_class == "UNKNOWN_OUTCOME":
                     ctx.flags.add("timeout")
-                    st.warn(f"No reply after {ctx.last_tool_ms / 1000:.1f} s. Outcome unknown, so not retrying yet",
+                    st.warn(f"No reply after {self.provider.config.timeout_seconds:.1f} s. Outcome unknown, so not "
+                            "retrying yet",
                             detail={**detail, "error_class": "UNKNOWN_OUTCOME",
                                     "next": "ask get_booking_status before any retry"})
                 elif res.error_class == "OPTION_GONE":
@@ -1500,3 +1507,21 @@ class AgentService:
 _LABEL = {"service": "service", "area": "area", "date_range": "date", "time_window": "time", "budget": "budget",
           "provider": "provider"}
 
+
+def _intent_label(i: Intent) -> str:
+    services = {"plumber": "a plumber", "electrician": "an electrician", "ac_servicing": "AC servicing",
+                "cleaning": "home cleaning", "carpenter": "a carpenter"}
+    if i.kind == "start_task":
+        verb = {"book": "book", "reschedule": "move", "cancel": "cancel"}.get(i.task or "book", "book")
+        what = services.get(i.service or "", "a booking" if verb != "book" else "a service")
+        extra = ", same provider as last time" if i.provider_ref == "last_time" else ""
+        return f"Understood: {verb} {what}{extra}"
+    if i.kind == "provide_details":
+        parts = [f"{k.replace('_expr', '').replace('_inr', '')} {v}" for k, v in i.to_dict().items()
+                 if k not in ("kind", "is_correction")]
+        return ("Understood: change " if i.is_correction else "Understood: ") + ", ".join(parts)
+    return {"select": f"Understood: option {i.option_index}", "confirm": "Understood: yes",
+            "decline": "Understood: no", "memory": f"Understood: {i.memory_op or 'view'} memory",
+            "ask_reviews": f"Understood: reviews of {i.provider_ref or 'that provider'}",
+            "list_bookings": "Understood: list my bookings", "greeting": "Understood: greeting",
+            "abort": "Understood: stop"}.get(i.kind, "Understood")

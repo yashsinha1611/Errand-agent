@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Errand — agent console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper: #F5F6F3;
+  --panel: #FFFFFF;
+  --ink: #1D2733;
+  --ink-2: #57626E;
+  --ink-3: #8A949F;
+  --rule: #DADFDA;
+  --rule-2: #ECEFEB;
+  --bubble: #E7EBEE;
+  --marigold: #E39A0B;
+  --marigold-ink: #8F5B00;
+  --marigold-tint: #FBF0D6;
+  --teal: #0E7C6B;
+  --teal-tint: #E0F1EC;
+  --red: #B73A27;
+  --red-tint: #FAE6E1;
+  --blue: #2C5AA6;
+  --blue-tint: #E5ECF7;
+  --btn: #1D2733;
+  --btn-ink: #FFFFFF;
+  --font: 'Schibsted Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #10141A; --panel: #161B22; --ink: #E4E8EC; --ink-2: #A2ACB7; --ink-3: #6E7984;
+    --rule: #28303A; --rule-2: #1E242C; --bubble: #232B35;
+    --marigold: #F1B23A; --marigold-ink: #F1B23A; --marigold-tint: rgba(241,178,58,.13);
+    --teal: #45BBA6; --teal-tint: rgba(69,187,166,.13);
+    --red: #EE6F58; --red-tint: rgba(238,111,88,.13);
+    --blue: #82A8EE; --blue-tint: rgba(130,168,238,.13);
+    --btn: #E4E8EC; --btn-ink: #10141A;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #10141A; --panel: #161B22; --ink: #E4E8EC; --ink-2: #A2ACB7; --ink-3: #6E7984;
+  --rule: #28303A; --rule-2: #1E242C; --bubble: #232B35;
+  --marigold: #F1B23A; --marigold-ink: #F1B23A; --marigold-tint: rgba(241,178,58,.13);
+  --teal: #45BBA6; --teal-tint: rgba(69,187,166,.13);
+  --red: #EE6F58; --red-tint: rgba(238,111,88,.13);
+  --blue: #82A8EE; --blue-tint: rgba(130,168,238,.13);
+  --btn: #E4E8EC; --btn-ink: #10141A;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; height: 100%;
+  background: var(--paper); color: var(--ink);
+  font: 15px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--panel);
+}
+button, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* ---------- Layout ---------- */
+.app { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--rule);
+  position: relative; z-index: 5;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand b { font-size: 19px; font-weight: 700; letter-spacing: -0.015em; }
+.brand span { color: var(--ink-2); font-size: 13.5px; white-space: nowrap; }
+.bar .spacer { flex: 1; }
+.clock { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.conn { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.conn i { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+.conn[data-status="offline"] i { background: var(--red); }
+.conn[data-status="offline"] { color: var(--red); }
+.select {
+  appearance: none; -webkit-appearance: none;
+  border: 1px solid var(--rule); background: var(--panel); border-radius: 8px;
+  padding: 6px 30px 6px 10px; font-size: 13.5px; font-weight: 500;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+  background-size: 5px 5px; background-repeat: no-repeat;
+}
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: none; padding: 5px 9px; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.seg button[aria-pressed="true"] { background: var(--bubble); color: var(--ink); font-weight: 600; }
+.tool-btn {
+  border: 1px solid var(--rule); background: var(--panel); border-radius: 8px;
+  padding: 5px 10px; font-size: 13px; color: var(--ink); display: inline-flex; align-items: center; gap: 6px;
+}
+.tool-btn svg { width: 15px; height: 15px; }
+.only-narrow { display: none; }
+
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: 0; }
+.chat { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+.log { overflow-y: auto; padding: 32px 24px 16px; overscroll-behavior: contain; }
+.log-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+
+/* ---------- Intro ---------- */
+.intro h1 { font-size: 26px; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+.intro p { margin: 0 0 6px; color: var(--ink-2); max-width: 62ch; }
+.intro .how { font-size: 14px; color: var(--ink-3); }
+
+/* ---------- Turns ---------- */
+.turn.user { display: flex; justify-content: flex-end; }
+.bubble {
+  margin: 0; max-width: min(80%, 560px); padding: 10px 14px;
+  background: var(--bubble); border-radius: 16px 16px 4px 16px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.turn.agent { display: flex; flex-direction: column; gap: 12px; }
+.turn-title { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--marigold-ink); }
+
+.activity { border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+.activity-head {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border: 0; background: none; text-align: left;
+  font-size: 13.5px; color: var(--ink-2); border-radius: 10px;
+}
+.activity-head .head-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity[data-state="running"] .head-text { color: var(--ink); }
+.activity-head .head-meta { font-variant-numeric: tabular-nums; color: var(--ink-3); font-size: 12.5px; }
+.chev { width: 8px; height: 8px; border-right: 1.5px solid var(--ink-3); border-bottom: 1.5px solid var(--ink-3); transform: rotate(45deg) translate(-2px, -2px); transition: transform .15s; }
+.activity-head[aria-expanded="false"] .chev { transform: rotate(-45deg); }
+.steps { list-style: none; margin: 0; padding: 0 12px 8px; border-top: 1px solid var(--rule-2); }
+.step { position: relative; }
+.step + .step::before {
+  content: ""; position: absolute; left: 8.5px; top: -9px; height: 16px; width: 1px; background: var(--rule);
+}
+.step-main {
+  width: 100%; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 7px 0; border: 0; background: none; text-align: left; cursor: default;
+}
+.step.has-detail .step-main { cursor: pointer; }
+.step.has-detail .step-label::after {
+  content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 8px; vertical-align: 2px;
+  border-right: 1.3px solid var(--ink-3); border-bottom: 1.3px solid var(--ink-3); transform: rotate(-45deg);
+}
+.step.has-detail .step-main[aria-expanded="true"] .step-label::after { transform: rotate(45deg); vertical-align: 4px; }
+.step-label { font-size: 14px; color: var(--ink); }
+.step[data-status="running"] .step-label { color: var(--ink-2); }
+.step-ms { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.step-detail {
+  margin: 0 0 8px 28px; padding: 10px 12px; background: var(--paper); border-radius: 6px;
+  font: 12px/1.55 var(--mono); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere;
+  max-height: 260px; overflow: auto;
+}
+.ic { display: inline-flex; width: 18px; height: 18px; }
+.ic svg { width: 18px; height: 18px; }
+.ic-running { color: var(--blue); }
+.ic-done { color: var(--teal); }
+.ic-warn { color: var(--marigold); }
+.ic-error { color: var(--red); }
+.ic-stopped { color: var(--ink-3); }
+.ic-info { color: var(--blue); }
+.spin { animation: spin 0.9s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.reply { font-size: 15.5px; line-height: 1.62; }
+.reply-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.caret { display: none; width: 8px; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; background: var(--ink-2); animation: blink 1s steps(2) infinite; }
+.reply.streaming .caret { display: inline-block; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---------- Options ---------- */
+.options { border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); overflow: hidden; }
+.option {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; align-items: baseline;
+  padding: 12px 14px; border: 0; border-top: 1px solid var(--rule-2); background: none; text-align: left;
+}
+.option:first-child { border-top: 0; }
+.option:hover:not(:disabled) { background: var(--paper); }
+.option .o-name { font-weight: 600; }
+.option .o-price { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.option .o-meta, .option .o-slot { font-size: 13.5px; color: var(--ink-2); }
+.option .o-slot { text-align: right; }
+.option:disabled { opacity: .55; }
+.option.chosen { opacity: 1; background: var(--blue-tint); }
+
+/* ---------- Approval work order ---------- */
+.approval {
+  position: relative; max-width: 540px;
+  background: var(--panel); border: 1px solid var(--rule); border-top: 3px solid var(--marigold);
+  border-radius: 6px; padding: 16px 18px 0;
+}
+.approval h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+.approval dl { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 6px 12px; margin: 0 0 10px; font-size: 14.5px; }
+.approval dt { color: var(--ink-2); }
+.approval dd { margin: 0; }
+.approval .price { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.approval .was { margin-left: 10px; color: var(--ink-3); text-decoration: line-through; font-variant-numeric: tabular-nums; }
+.approval .price-row { display: flex; align-items: baseline; }
+.price-note { margin: 0 0 10px; font-size: 13.5px; color: var(--ink-2); }
+.price-note.over { color: var(--marigold-ink); font-weight: 500; }
+.fp { margin: 0 0 14px; font: 11.5px/1.4 var(--mono); color: var(--ink-3); }
+.ap-status { margin: 0 0 14px; font-size: 13.5px; color: var(--ink-2); }
+.stub {
+  margin: 0 -18px; padding: 12px 18px 14px; border-top: 1px dashed var(--rule);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.btn { border-radius: 8px; padding: 9px 16px; font-size: 14px; font-weight: 600; border: 1px solid transparent; }
+.btn-primary { background: var(--btn); color: var(--btn-ink); }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+.btn-quiet { background: none; border-color: var(--rule); color: var(--ink); font-weight: 500; }
+.btn:disabled { opacity: .5; }
+.expires { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
+.stamp {
+  position: absolute; right: 16px; top: 14px;
+  border: 2px solid currentColor; border-radius: 6px; padding: 3px 10px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.02em; background: var(--panel);
+  transform: rotate(-5deg); animation: stamp .28s cubic-bezier(.2,.9,.3,1.3);
+}
+@keyframes stamp { from { transform: rotate(-5deg) scale(1.5); opacity: 0; } to { transform: rotate(-5deg) scale(1); opacity: 1; } }
+.approval[data-status="consumed"] { border-top-color: var(--teal); }
+.approval[data-status="consumed"] .stamp { color: var(--teal); }
+.approval[data-status="void"], .approval[data-status="declined"] { border-top-color: var(--rule); }
+.approval[data-status="void"] .stamp { color: var(--red); }
+.approval[data-status="declined"] .stamp { color: var(--ink-3); }
+.approval[data-status="void"] dl, .approval[data-status="void"] .price-note,
+.approval[data-status="declined"] dl { opacity: .5; }
+.approval[data-status="void"] dd { text-decoration: line-through; text-decoration-color: var(--ink-3); }
+
+/* ---------- Notices ---------- */
+.notice {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px;
+  font-size: 14px; background: var(--teal-tint); color: var(--ink);
+}
+.notice[data-level="error"] { background: var(--red-tint); }
+.notice[data-level="info"] { background: var(--blue-tint); }
+
+/* ---------- Composer ---------- */
+.composer { padding: 8px 24px 18px; }
+.composer-inner { max-width: 720px; margin: 0 auto; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.chip {
+  border: 1px solid var(--rule); background: var(--panel); border-radius: 999px;
+  padding: 6px 13px; font-size: 13.5px; text-align: left;
+}
+.chip:hover:not(:disabled) { border-color: var(--ink-3); }
+.input {
+  display: flex; align-items: flex-end; gap: 8px;
+  border: 1px solid var(--rule); background: var(--panel); border-radius: 14px; padding: 8px 8px 8px 14px;
+}
+.input:focus-within { border-color: var(--ink-3); }
+.input textarea {
+  flex: 1; border: 0; background: none; resize: none; outline: none;
+  padding: 7px 0; max-height: 160px; line-height: 1.45; font-size: 15px;
+}
+.send {
+  width: 38px; height: 38px; border-radius: 10px; border: 0; flex: none;
+  background: var(--btn); color: var(--btn-ink); display: grid; place-items: center;
+}
+.send:disabled { opacity: .35; }
+.send svg { width: 18px; height: 18px; }
+.hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---------- Inspector ---------- */
+.inspector {
+  border-left: 1px solid var(--rule); background: var(--panel);
+  display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0;
+}
+.tabs { display: flex; align-items: stretch; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--rule); }
+.tab {
+  position: relative; border: 0; background: none; padding: 12px 10px 11px;
+  font-size: 14px; font-weight: 500; color: var(--ink-2); border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tab .count { margin-left: 5px; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.tab[data-fresh="true"]::after {
+  content: ""; position: absolute; top: 10px; right: 2px; width: 6px; height: 6px; border-radius: 50%; background: var(--marigold);
+}
+.tabs .close { align-self: center; margin-left: auto; border: 0; background: none; font-size: 22px; line-height: 1; color: var(--ink-2); padding: 0 6px; }
+.panel { overflow-y: auto; min-height: 0; }
+.empty { margin: 0; padding: 20px 18px; color: var(--ink-3); font-size: 14px; }
+
+.tr {
+  display: grid; grid-template-columns: 26px 146px minmax(0, 1fr) auto; gap: 8px; align-items: baseline;
+  padding: 6px 16px; border-bottom: 1px solid var(--rule-2); font: 12px/1.5 var(--mono);
+}
+.tr-seq { color: var(--ink-3); text-align: right; }
+.tr-type { font-weight: 500; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-sum { color: var(--ink); overflow-wrap: anywhere; }
+.tr-ms { color: var(--ink-3); white-space: nowrap; }
+.tr[data-kind="tool"] .tr-type { color: var(--blue); }
+.tr[data-kind="approval"] .tr-type { color: var(--marigold-ink); }
+.tr[data-kind="outbox"] .tr-type, .tr[data-kind="memory"] .tr-type { color: var(--teal); }
+.tr[data-kind="error"] { background: var(--red-tint); }
+.tr[data-kind="error"] .tr-type { color: var(--red); }
+.tr[data-kind="system"] .tr-type { color: var(--marigold-ink); }
+
+.state-phase { padding: 18px 18px 6px; }
+.state-phase small { display: block; font-size: 12.5px; color: var(--ink-3); }
+.state-phase strong { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; }
+.kv { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 0; margin: 8px 0 16px; font-size: 14px; }
+.kv dt, .kv dd { padding: 7px 0; border-top: 1px solid var(--rule-2); margin: 0; }
+.kv dt { padding-left: 18px; color: var(--ink-2); }
+.kv dd { padding-right: 18px; overflow-wrap: anywhere; }
+.kv .nil { color: var(--ink-3); }
+.kv .warnv { color: var(--marigold-ink); font-weight: 600; }
+.kv .changed { animation: changed 1.2s ease-out; }
+@keyframes changed { from { background: var(--marigold-tint); } to { background: transparent; } }
+
+.fact { padding: 14px 18px; border-bottom: 1px solid var(--rule-2); }
+.fact-top { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.fact-key { font-size: 13px; color: var(--ink-2); }
+.fact-val { margin: 2px 0 0; font-size: 16px; font-weight: 600; }
+.fact-ev { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--teal-tint); color: var(--teal); font-weight: 500; white-space: nowrap; }
+.badge[data-kind="inferred"] { background: var(--marigold-tint); color: var(--marigold-ink); }
+.badge[data-kind="forgotten"] { background: var(--rule-2); color: var(--ink-3); }
+
+.ob { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 12px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--rule-2); }
+.ob code { font: 12.5px var(--mono); color: var(--ink); }
+.ob .ob-op { font-size: 13px; color: var(--ink-2); }
+.ob .ob-booking { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); }
+.pill { font: 500 11.5px var(--mono); padding: 2px 7px; border-radius: 5px; background: var(--blue-tint); color: var(--blue); }
+.pill[data-s="CONFIRMED"] { background: var(--teal-tint); color: var(--teal); }
+.pill[data-s="FAILED"], .pill[data-s="UNRESOLVED"] { background: var(--red-tint); color: var(--red); }
+.panel-foot { margin: 0; padding: 14px 18px 18px; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 1080px) {
+  .brand span, .clock { display: none; }
+}
+@media (max-width: 960px) {
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .only-narrow { display: inline-flex; }
+  .inspector {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(100%, 440px); z-index: 20;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateX(100%); visibility: hidden; transition: transform .22s ease, visibility 0s linear .22s;
+  }
+  .inspector.open { transform: none; visibility: visible; transition: transform .22s ease; box-shadow: -12px 0 32px rgba(0,0,0,.18); }
+  .bar { gap: 10px; padding: 10px 14px; flex-wrap: wrap; }
+  .log { padding: 22px 16px 12px; }
+  .composer { padding: 8px 16px 14px; }
+  .conn span { display: none; }
+}
+@media (max-width: 560px) {
+  .seg { display: none; }
+  .select { max-width: 52vw; }
+  .tr { grid-template-columns: 22px 96px minmax(0, 1fr); }
+  .tr-ms { display: none; }
+  .approval dl { grid-template-columns: 70px minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin, .caret, .stamp, .kv .changed { animation: none; }
+  .inspector { transition: none; }
+}
+
+/* ---------- Additions for the live console ---------- */
+.history.agent { display: flex; flex-direction: column; gap: 8px; }
+.faults { padding: 6px 0 18px; }
+.fault { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+  padding: 11px 18px; border-bottom: 1px solid var(--rule-2); font-size: 14px; }
+.fault button { border: 1px solid var(--rule); background: var(--panel); border-radius: 8px; padding: 5px 12px;
+  font-size: 13px; font-weight: 500; white-space: nowrap; }
+.fault button[aria-pressed="true"] { background: var(--marigold-tint); border-color: var(--marigold); color: var(--marigold-ink); }
+.fault-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 18px; }
+.fault-actions button { border: 1px solid var(--rule); background: var(--panel); border-radius: 8px; padding: 7px 12px; font-size: 13px; }
+.fault-actions button.danger { color: var(--red); }
+.panel h4 { margin: 0; padding: 16px 18px 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.intro .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand"><b>Errand</b><span>Home-service agent</span></div>
+    <div class="spacer"></div>
+    <span class="clock" id="clock" title="Agent clock. The demo can move it forward to expire a hold."></span>
+    <span class="conn" id="conn" data-status="online"><i aria-hidden="true"></i><span id="connText">Connecting…</span></span>
+    <button class="tool-btn" type="button" id="newChat">New chat</button>
+    <button class="tool-btn" type="button" id="theme" aria-label="Switch colour theme">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+    </button>
+    <button class="tool-btn only-narrow" type="button" id="inspectorOpen" aria-controls="inspector" aria-expanded="false">Inspector</button>
+  </header>
+
+  <main class="work">
+    <section class="chat" aria-label="Conversation">
+      <div class="log" id="log" role="log" aria-live="polite">
+        <div class="log-inner" id="logInner"></div>
+      </div>
+      <div class="composer">
+        <div class="composer-inner">
+          <div class="chips" id="chips"></div>
+          <form class="input" id="form">
+            <label for="text" class="sr-only">Message</label>
+            <textarea id="text" rows="1" placeholder="What do you need done?"></textarea>
+            <button class="send" id="send" type="submit" aria-label="Send">
+              <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 14.5V3.5M4.5 8L9 3.5 13.5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+          <p class="hint">Nothing is booked, moved or cancelled until you approve the exact provider, slot and price.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="inspector" id="inspector" aria-label="Inspector">
+      <div class="tabs" role="tablist" aria-label="Inspector views">
+        <button class="tab" role="tab" type="button" id="tab-trace" aria-selected="true" aria-controls="panel-trace">Trace<span class="count" id="traceCount">0</span></button>
+        <button class="tab" role="tab" type="button" id="tab-state" aria-selected="false" aria-controls="panel-state" tabindex="-1">State</button>
+        <button class="tab" role="tab" type="button" id="tab-memory" aria-selected="false" aria-controls="panel-memory" tabindex="-1">Memory</button>
+        <button class="tab" role="tab" type="button" id="tab-outbox" aria-selected="false" aria-controls="panel-outbox" tabindex="-1">Outbox</button>
+        <button class="tab" role="tab" type="button" id="tab-faults" aria-selected="false" aria-controls="panel-faults" tabindex="-1">Faults</button>
+        <button class="close only-narrow" type="button" id="inspectorClose" aria-label="Close inspector">×</button>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-trace" aria-labelledby="tab-trace"></div>
+      <div class="panel" role="tabpanel" id="panel-state" aria-labelledby="tab-state" hidden></div>
+      <div class="panel" role="tabpanel" id="panel-memory" aria-labelledby="tab-memory" hidden></div>
+      <div class="panel" role="tabpanel" id="panel-outbox" aria-labelledby="tab-outbox" hidden></div>
+      <div class="panel" role="tabpanel" id="panel-faults" aria-labelledby="tab-faults" hidden></div>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ======================================================================
+   * Errand console. Renders the NDJSON event stream from POST /api/turn.
+   *
+   *   step             {id, status: running|done|warn|error|stopped, label, ms?, detail?}
+   *   text             {delta}
+   *   options          {options: [{id, name, meta, price, slot, reply}]}
+   *   approval         {approval: {id, action, provider, when, from?, price, search_price?, budget?, fingerprint, expires?}}
+   *   approval_update  {id, status: consumed|void|declined, booking_id?, reason?}
+   *   chips / state / memory / outbox / trace / clock / new_turn / crash / turn_end
+   *
+   * Every string is rendered with textContent; nothing from the server is parsed as HTML.
+   * ==================================================================== */
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const rs = (n) => '₹' + Number(n).toLocaleString('en-IN');
+  const fmtMs = (ms) => (ms == null ? '' : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  function el(tag, props = {}, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid.nodeType ? kid : String(kid));
+    return n;
+  }
+
+  const ICONS = {
+    running: '<svg viewBox="0 0 18 18" class="spin"><circle cx="9" cy="9" r="6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30 11" stroke-linecap="round"/></svg>',
+    done: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="currentColor" opacity=".15"/><path d="M5.6 9.2l2.3 2.3 4.6-4.9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    warn: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="currentColor" opacity=".18"/><path d="M9 5v4.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="12.6" r="1.15" fill="currentColor"/></svg>',
+    error: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="currentColor" opacity=".16"/><path d="M6.3 6.3l5.4 5.4M11.7 6.3l-5.4 5.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+    info: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="currentColor" opacity=".16"/><circle cx="9" cy="5.6" r="1.15" fill="currentColor"/><path d="M9 8.4v4.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    stopped: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="currentColor" opacity=".16"/><rect x="6.2" y="6.2" width="5.6" height="5.6" rx="1" fill="currentColor"/></svg>',
+  };
+  function icon(name) {
+    const s = el('span', { class: `ic ic-${name}`, 'aria-hidden': 'true' });
+    s.innerHTML = ICONS[name] || ICONS.done; // trusted constants only
+    return s;
+  }
+
+  /* ---------------- Session ---------------- */
+  function newSessionId() {
+    return 's-' + ((window.crypto && crypto.randomUUID) ? crypto.randomUUID().slice(0, 13) : String(Date.now()));
+  }
+  let sessionId;
+  try { sessionId = localStorage.getItem('errand-session') || newSessionId(); localStorage.setItem('errand-session', sessionId); }
+  catch (e) { sessionId = newSessionId(); }
+
+  /* ---------------- Chat log ---------------- */
+  const scroller = $('#log');
+  const log = {
+    inner: $('#logInner'),
+    stick: true,
+    add(node) { this.inner.append(node); this.follow(); },
+    reset() { this.inner.replaceChildren(); this.stick = true; },
+    follow() { if (this.stick) scroller.scrollTop = scroller.scrollHeight; },
+  };
+  scroller.addEventListener('scroll', () => {
+    log.stick = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 90;
+  });
+
+  class TurnView {
+    constructor(title) {
+      this.steps = new Map();
+      this.order = [];
+      this.done = false;
+      this.keepOpen = Boolean(title);
+      this.root = el('article', { class: 'turn agent', hidden: true });
+      if (title) this.root.append(el('p', { class: 'turn-title', text: title }));
+      this.actSlot = el('div');
+      this.replyText = el('span', { class: 'reply-text' });
+      this.reply = el('div', { class: 'reply', hidden: true }, this.replyText, el('span', { class: 'caret', 'aria-hidden': 'true' }));
+      this.attachSlot = el('div', { class: 'attach', hidden: true });
+      this.root.append(this.actSlot, this.reply, this.attachSlot);
+      log.add(this.root);
+    }
+    get empty() { return this.root.hidden; }
+    show() { this.root.hidden = false; }
+    ensureActivity() {
+      if (this.activity) return;
+      this.headIcon = el('span', { class: 'head-ic' });
+      this.headText = el('span', { class: 'head-text', text: 'Working' });
+      this.headMeta = el('span', { class: 'head-meta' });
+      this.head = el('button', { class: 'activity-head', type: 'button', 'aria-expanded': 'true' },
+        this.headIcon, this.headText, this.headMeta, el('span', { class: 'chev', 'aria-hidden': 'true' }));
+      this.head.addEventListener('click', () => this.setOpen(this.head.getAttribute('aria-expanded') !== 'true'));
+      this.list = el('ol', { class: 'steps' });
+      this.activity = el('div', { class: 'activity', 'data-state': 'running' }, this.head, this.list);
+      this.actSlot.append(this.activity);
+    }
+    setOpen(open) { this.head.setAttribute('aria-expanded', String(open)); this.list.hidden = !open; }
+    step(ev) {
+      this.show();
+      this.ensureActivity();
+      let s = this.steps.get(ev.id);
+      if (!s) {
+        const ic = el('span', { class: 'step-ic' });
+        const label = el('span', { class: 'step-label' });
+        const ms = el('span', { class: 'step-ms' });
+        const btn = el('button', { class: 'step-main', type: 'button', 'aria-expanded': 'false' }, ic, label, ms);
+        const li = el('li', { class: 'step' }, btn);
+        s = { li, ic, label, ms, btn, pre: null, status: null, msv: 0 };
+        btn.addEventListener('click', () => {
+          if (!s.pre) return;
+          const open = btn.getAttribute('aria-expanded') !== 'true';
+          btn.setAttribute('aria-expanded', String(open));
+          s.pre.hidden = !open;
+        });
+        this.steps.set(ev.id, s);
+        this.order.push(s);
+        this.list.append(li);
+      }
+      if (ev.label) s.label.textContent = ev.label;
+      if (ev.status && ev.status !== s.status) { s.status = ev.status; s.li.dataset.status = ev.status; s.ic.replaceChildren(icon(ev.status)); }
+      if (ev.ms != null) { s.msv = ev.ms; s.ms.textContent = fmtMs(ev.ms); }
+      if (ev.detail) {
+        if (!s.pre) { s.pre = el('pre', { class: 'step-detail', hidden: true }); s.li.append(s.pre); s.li.classList.add('has-detail'); }
+        s.pre.textContent = JSON.stringify(ev.detail, null, 2);
+      }
+      if (!this.done) {
+        const running = this.order.filter((x) => x.status === 'running');
+        const cur = running.at(-1) || this.order.at(-1);
+        this.headIcon.replaceChildren(icon('running'));
+        this.headText.textContent = cur ? cur.label.textContent : 'Working';
+      }
+    }
+    text(delta) { this.show(); this.reply.hidden = false; this.reply.classList.add('streaming'); this.replyText.textContent += delta; }
+    attach(node) { this.show(); this.reply.classList.remove('streaming'); this.attachSlot.hidden = false; this.attachSlot.append(node); }
+    end() {
+      if (this.done) return;
+      this.done = true;
+      this.reply.classList.remove('streaming');
+      if (!this.activity) return;
+      for (const s of this.order) if (s.status === 'running') { s.status = 'stopped'; s.li.dataset.status = 'stopped'; s.ic.replaceChildren(icon('stopped')); }
+      const n = this.order.length;
+      const attention = this.order.filter((s) => ['warn', 'error', 'stopped'].includes(s.status)).length;
+      const work = this.order.reduce((t, s) => t + (s.msv || 0), 0);
+      this.activity.dataset.state = attention ? 'attention' : 'done';
+      this.headIcon.replaceChildren(icon(attention ? 'warn' : 'done'));
+      this.headText.textContent = `${n} ${n === 1 ? 'step' : 'steps'}` + (attention ? `, ${attention} needed attention` : '');
+      this.headMeta.textContent = fmtMs(work);
+      if (!attention && !this.keepOpen) this.setOpen(false);
+    }
+  }
+
+  /* ---------------- Options and approvals ---------------- */
+  function optionsList(options) {
+    const wrap = el('div', { class: 'options', role: 'group', 'aria-label': 'Choose an option' });
+    for (const o of options) {
+      const b = el('button', { class: 'option', type: 'button' },
+        el('span', { class: 'o-name', text: o.name }), el('span', { class: 'o-price', text: o.price != null ? rs(o.price) : '' }),
+        el('span', { class: 'o-meta', text: o.meta || '' }), el('span', { class: 'o-slot', text: o.slot || '' }));
+      b.addEventListener('click', () => { b.classList.add('chosen'); submit({ kind: 'message', text: o.reply }); });
+      wrap.append(b);
+    }
+    return wrap;
+  }
+  const disableOptions = () => document.querySelectorAll('.option').forEach((b) => { b.disabled = true; });
+
+  const approvals = new Map();
+  function approvalCard(a) {
+    const title = a.action === 'reschedule' ? 'Approve this change' : a.action === 'cancel' ? 'Approve this cancellation' : 'Approve this booking';
+    const yesLabel = a.action === 'reschedule' ? 'Move it' : a.action === 'cancel' ? 'Cancel the booking' : `Book for ${rs(a.price)}`;
+    const noLabel = a.action === 'book' ? 'Don’t book' : 'Keep it as is';
+    const notes = [];
+    const moved = a.search_price != null && a.search_price !== a.price;
+    if (moved) { const d = a.price - a.search_price; notes.push(`${rs(Math.abs(d))} ${d > 0 ? 'above' : 'below'} the search price`); }
+    const over = a.budget != null && a.price > a.budget;
+    if (a.budget != null) notes.push(over ? `${rs(a.price - a.budget)} over your ${rs(a.budget)} budget` : `within your ${rs(a.budget)} budget`);
+    const yes = el('button', { class: 'btn btn-primary', type: 'button', text: yesLabel });
+    const no = el('button', { class: 'btn btn-quiet', type: 'button', text: noLabel });
+    yes.addEventListener('click', () => submit({ kind: 'confirm', approval_id: a.id, text: yesLabel }));
+    no.addEventListener('click', () => submit({ kind: 'decline', approval_id: a.id, text: noLabel }));
+    const stub = el('div', { class: 'stub' }, yes, no, a.expires ? el('span', { class: 'expires', text: `Slot held until ${a.expires}` }) : null);
+    const stamp = el('span', { class: 'stamp', hidden: true });
+    const status = el('p', { class: 'ap-status', hidden: true });
+    const rows = [el('dt', { text: 'Provider' }), el('dd', { text: a.provider })];
+    if (a.booking_id) rows.push(el('dt', { text: 'Booking' }), el('dd', { text: a.booking_id }));
+    if (a.from) rows.push(el('dt', { text: 'Now' }), el('dd', { text: a.from }));
+    rows.push(el('dt', { text: a.from ? 'Move to' : 'When' }), el('dd', { text: a.when }),
+      el('dt', { text: 'Price' }), el('dd', { class: 'price-row' }, el('span', { class: 'price', text: rs(a.price) }),
+        moved ? el('span', { class: 'was', text: rs(a.search_price), 'aria-label': `search price ${rs(a.search_price)}` }) : null));
+    const card = el('section', { class: 'approval', 'data-status': 'pending', 'aria-label': title },
+      stamp, el('h3', { text: title }), el('dl', {}, rows),
+      notes.length ? el('p', { class: 'price-note' + (over ? ' over' : ''), text: cap(notes.join(', ')) + '.' }) : null,
+      el('p', { class: 'fp', text: `Approval ${a.id}, fingerprint ${a.fingerprint}` }), status, stub);
+    approvals.set(a.id, { a, card, stamp, status, stub, yes, no });
+    return card;
+  }
+  function updateApproval(ev) {
+    const r = approvals.get(ev.id);
+    if (!r) return;
+    r.card.dataset.status = ev.status; r.stub.hidden = true; r.stamp.hidden = false; r.status.hidden = false;
+    if (ev.status === 'consumed') {
+      const verb = r.a.action === 'cancel' ? 'Cancelled' : r.a.action === 'reschedule' ? 'Moved' : 'Booked';
+      r.stamp.textContent = ev.booking_id ? `${verb} ${ev.booking_id}` : 'Approved';
+      r.status.textContent = 'Approved and used once. This approval can’t be used again.';
+    } else if (ev.status === 'void') {
+      r.stamp.textContent = 'Void';
+      r.status.textContent = ev.reason || 'This approval no longer matches what would happen.';
+    } else if (ev.status === 'declined') {
+      r.stamp.textContent = 'Declined';
+      r.status.textContent = 'You declined. Nothing changed.';
+    }
+  }
+  function setApprovalButtons(enabled) {
+    for (const r of approvals.values()) if (r.card.dataset.status === 'pending') { r.yes.disabled = !enabled; r.no.disabled = !enabled; }
+  }
+
+  /* ---------------- Chips, header ---------------- */
+  const chipsEl = $('#chips');
+  function setChips(list) {
+    chipsEl.replaceChildren(...(list || []).map((t) => {
+      const b = el('button', { class: 'chip', type: 'button', text: t, disabled: busy });
+      b.addEventListener('click', () => submit({ kind: 'message', text: t }));
+      return b;
+    }));
+  }
+  let modelLabel = '';
+  function setClock(t) { $('#clock').textContent = t ? `Agent clock: ${t}` : ''; }
+  function setConn(status, label) {
+    $('#conn').dataset.status = status;
+    $('#connText').textContent = label || (status === 'offline' ? 'Agent offline' : modelLabel);
+  }
+  function describeModel(name) { return !name || name.startsWith('rule') ? 'Offline rule model' : `Claude: ${name}`; }
+  function noticeEl(level, text) {
+    return el('div', { class: 'notice', 'data-level': level, role: level === 'error' ? 'alert' : null },
+      icon(level === 'error' ? 'error' : level === 'ok' ? 'done' : 'info'), el('span', { text }));
+  }
+
+  /* ---------------- Inspector ---------------- */
+  const TABS = ['trace', 'state', 'memory', 'outbox', 'faults'];
+  function selectTab(name, focus) {
+    for (const t of TABS) {
+      const tab = $(`#tab-${t}`), panel = $(`#panel-${t}`), on = t === name;
+      tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1; panel.hidden = !on;
+      if (on) { tab.dataset.fresh = 'false'; if (focus) tab.focus(); }
+    }
+  }
+  TABS.forEach((t, i) => {
+    const tab = $(`#tab-${t}`);
+    tab.addEventListener('click', () => selectTab(t));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') selectTab(TABS.at((i + 1) % TABS.length), true);
+      if (e.key === 'ArrowLeft') selectTab(TABS.at((i - 1 + TABS.length) % TABS.length), true);
+    });
+  });
+  const markFresh = (name) => { const tab = $(`#tab-${name}`); if (tab.getAttribute('aria-selected') !== 'true') tab.dataset.fresh = 'true'; };
+
+  const KIND = { tool_call: 'tool', model_call: 'model', approval: 'approval', outbox: 'outbox', memory: 'memory', memory_use: 'memory',
+    state_transition: 'state', injection_suspected: 'error', error: 'error', crash: 'error', recovery: 'system', budget: 'error' };
+  const LABELS = { phase: 'Phase', task: 'Task', service: 'Service', provider: 'Provider', area: 'Area', date_range: 'Dates',
+    time_window: 'Time window', budget: 'Budget', booking_to_change: 'Booking to change', selection: 'Selection', hold: 'Hold',
+    pending_approval: 'Pending approval', booking: 'Booking', missing: 'Missing' };
+  const inspector = {
+    traceCount: 0,
+    lastState: {},
+    resetTrace() { this.traceCount = 0; $('#traceCount').textContent = '0'; $('#panel-trace').replaceChildren(el('p', { class: 'empty', text: 'Every model call, tool call, approval and outbox change appears here as it happens.' })); },
+    addTrace(e, quiet) {
+      const panel = $('#panel-trace');
+      if (this.traceCount === 0) panel.replaceChildren();
+      this.traceCount += 1;
+      $('#traceCount').textContent = String(this.traceCount);
+      const kind = e.level === 'error' ? 'error' : KIND[e.type] || 'other';
+      const stick = panel.scrollHeight - panel.scrollTop - panel.clientHeight < 60;
+      panel.append(el('div', { class: 'tr', 'data-kind': kind }, el('span', { class: 'tr-seq', text: e.seq ?? this.traceCount }),
+        el('span', { class: 'tr-type', text: e.type }), el('span', { class: 'tr-sum', text: e.summary || '' }), el('span', { class: 'tr-ms', text: fmtMs(e.ms) })));
+      if (stick || quiet) panel.scrollTop = panel.scrollHeight;
+      if (!quiet) markFresh('trace');
+    },
+    setState(s, quiet) {
+      const panel = $('#panel-state');
+      const phase = s.phase ? String(s.phase).replace(/_/g, ' ') : 'idle';
+      const dl = el('dl', { class: 'kv' });
+      const hadState = Object.keys(this.lastState).length > 0;
+      for (const [k, v] of Object.entries(s)) {
+        if (k === 'phase') continue;
+        let dd;
+        if (v == null || v === '') dd = el('dd', {}, el('span', { class: 'nil', text: 'not set' }));
+        else if (Array.isArray(v)) dd = el('dd', {}, v.length ? el('span', { class: k === 'missing' ? 'warnv' : null, text: v.join(', ') }) : el('span', { class: 'nil', text: 'nothing' }));
+        else dd = el('dd', { text: String(v) });
+        if (hadState && JSON.stringify(this.lastState[k]) !== JSON.stringify(v)) dd.classList.add('changed');
+        dl.append(el('dt', { text: LABELS[k] || cap(k.replace(/_/g, ' ')) }), dd);
+      }
+      panel.replaceChildren(el('div', { class: 'state-phase' }, el('small', { text: 'Phase' }), el('strong', { text: cap(phase) })), dl,
+        el('p', { class: 'panel-foot', text: 'Session state lives in the database, not in the model. “Missing” is computed from it, which is why a known detail is never asked twice.' }));
+      if (hadState && !quiet) markFresh('state');
+      this.lastState = { ...s };
+    },
+    setMemory(facts, quiet) {
+      const panel = $('#panel-memory');
+      if (!facts || !facts.length) { panel.replaceChildren(el('p', { class: 'empty', text: 'Nothing remembered yet. The agent stores only what you state or confirm.' })); return; }
+      panel.replaceChildren(...facts.map((f) => {
+        const kind = f.source === 'stated' ? 'stated' : 'inferred';
+        const badge = f.source === 'stated' ? 'Stated by you' : f.confirmed ? 'Inferred, you confirmed' : 'Inferred, not used until you confirm';
+        return el('div', { class: 'fact' }, el('div', { class: 'fact-top' }, el('span', { class: 'fact-key', text: f.key }), el('span', { class: 'badge', 'data-kind': kind, text: badge })),
+          el('p', { class: 'fact-val', text: f.value }), f.evidence ? el('p', { class: 'fact-ev', text: f.evidence }) : null);
+      }));
+      if (!quiet) markFresh('memory');
+    },
+    setOutbox(rows, quiet) {
+      const panel = $('#panel-outbox');
+      const foot = el('p', { class: 'panel-foot', text: 'A row is written before every book, cancel or reschedule call, with a key derived from the approval. Retries and restarts reuse it, so the provider never sees a second booking.' });
+      if (!rows || !rows.length) { panel.replaceChildren(el('p', { class: 'empty', text: 'No writes yet.' }), foot); return; }
+      panel.replaceChildren(...rows.map((r) => el('div', { class: 'ob' }, el('code', { text: r.key }), el('span', { class: 'ob-op', text: r.op }),
+        el('span', { class: 'pill', 'data-s': r.status, text: r.status }),
+        r.booking ? el('span', { class: 'ob-booking', text: `Booking ${r.booking}, ${r.attempts} attempt${r.attempts === 1 ? '' : 's'}` } ) : null)), foot);
+      if (!quiet) markFresh('outbox');
+    },
+    setFaults(f) {
+      const panel = $('#panel-faults');
+      const list = el('div', { class: 'faults' }, el('h4', { text: 'Arm a failure for the next matching call' }),
+        ...f.catalogue.map((x) => {
+          const b = el('button', { type: 'button', 'aria-pressed': String(x.armed), text: x.armed ? 'Armed' : 'Arm' });
+          b.addEventListener('click', async () => { if (!x.armed) inspector.setFaults(await post('/api/faults', { id: x.id })); });
+          return el('div', { class: 'fault' }, el('span', { text: x.label }), b);
+        }));
+      const clockBtn = el('button', { type: 'button', text: 'Move agent clock +11 min' });
+      clockBtn.addEventListener('click', async () => { await post('/api/clock', { minutes: 11 }); const s = await get(`/api/snapshot?session_id=${sessionId}`); setClock(s.clock); log.add(noticeEl('info', 'Agent clock moved forward 11 minutes. Any 10-minute hold has now expired.')); });
+      const clearBtn = el('button', { type: 'button', text: 'Clear armed faults' });
+      clearBtn.addEventListener('click', async () => inspector.setFaults(await post('/api/faults', { action: 'clear' })));
+      let armedReset = false;
+      const resetBtn = el('button', { type: 'button', class: 'danger', text: 'Reset world' });
+      resetBtn.addEventListener('click', async () => {
+        if (!armedReset) { armedReset = true; resetBtn.textContent = 'Click again to wipe everything'; return; }
+        await post('/api/reset', {}); sessionId = newSessionId(); try { localStorage.setItem('errand-session', sessionId); } catch (e) { /* ignore */ }
+        await boot();
+      });
+      panel.replaceChildren(list, el('div', { class: 'fault-actions' }, clockBtn, clearBtn, resetBtn),
+        el('p', { class: 'panel-foot', text: 'Demo controls. They change the mock provider and the agent clock; the agent is not told. Crash faults really stop the server process, and the supervisor restarts it.' }));
+    },
+  };
+
+  /* ---------------- Networking ---------------- */
+  async function get(path) { const r = await fetch(path, { cache: 'no-store' }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+  async function post(path, body) {
+    const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, ...body }) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }
+  async function* stream(path, body) {
+    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, ...body }) });
+    if (!res.ok || !res.body) throw new Error(`The agent replied with HTTP ${res.status}`);
+    if ((res.headers.get('Content-Type') || '').startsWith('application/json')) { await res.json(); return; }
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf('\n')) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) yield JSON.parse(line); }
+    }
+    if (buf.trim()) yield JSON.parse(buf);
+  }
+
+  function route(ev, turn) {
+    switch (ev.type) {
+      case 'step': turn.step(ev); break;
+      case 'text': turn.text(ev.delta); break;
+      case 'options': turn.attach(optionsList(ev.options)); break;
+      case 'approval': turn.attach(approvalCard(ev.approval)); break;
+      case 'approval_update': updateApproval(ev); break;
+      case 'chips': setChips(ev.chips); break;
+      case 'state': inspector.setState(ev.state); break;
+      case 'memory': inspector.setMemory(ev.facts); break;
+      case 'outbox': inspector.setOutbox(ev.rows); break;
+      case 'trace': inspector.addTrace(ev.event); break;
+      case 'clock': setClock(ev.display); break;
+      case 'new_turn': turn.end(); return new TurnView(ev.title);
+      default: break;
+    }
+    return turn;
+  }
+
+  /* ---------------- Turns ---------------- */
+  let busy = false;
+  const textEl = $('#text');
+  const sendBtn = $('#send');
+  function setBusy(b) {
+    busy = b;
+    sendBtn.disabled = b || !textEl.value.trim();
+    chipsEl.querySelectorAll('button').forEach((x) => { x.disabled = b; });
+  }
+
+  async function runStream(path, body) {
+    let turn = new TurnView();
+    let crashed = null;
+    try {
+      for await (const ev of stream(path, body)) {
+        if (ev.type === 'crash') { crashed = ev.point; continue; }
+        turn = route(ev, turn);
+        log.follow();
+      }
+    } catch (err) {
+      crashed = crashed || 'connection';
+    }
+    turn.end();
+    if (crashed) await recoverAfterCrash(crashed);
+  }
+
+  async function recoverAfterCrash(point) {
+    setConn('offline');
+    log.add(noticeEl('error', point === 'connection'
+      ? 'Lost the connection to the agent. Waiting for it to come back.'
+      : `The agent process stopped (demo crash point: ${point}). The supervisor is restarting it.`));
+    for (let i = 0; i < 90; i++) {
+      await sleep(800);
+      try { const h = await get('/api/health'); modelLabel = describeModel(h.model); break; } catch (e) { /* still down */ }
+    }
+    setConn('online');
+    log.add(noticeEl('info', 'Agent restarted. Checking unfinished work before anything else.'));
+    try {
+      const snap = await get(`/api/snapshot?session_id=${sessionId}`);
+      inspector.setFaults(snap.faults);
+      if (snap.open_writes) await runStream('/api/resume', {});
+      else log.add(noticeEl('ok', 'Nothing was left unfinished.'));
+    } catch (e) { log.add(noticeEl('error', `Couldn’t reach the agent: ${e.message}`)); }
+  }
+
+  async function submit(input) {
+    if (busy) return;
+    const text = (input.text || '').trim();
+    if (input.kind === 'message' && !text) return;
+    setBusy(true);
+    setChips([]);
+    setApprovalButtons(false);
+    disableOptions();
+    const intro = $('.intro');
+    if (intro) intro.remove();
+    if (text) log.add(el('div', { class: 'turn user' }, el('p', { class: 'bubble', text })));
+    try {
+      await runStream('/api/turn', input);
+    } finally {
+      setApprovalButtons(true);
+      setBusy(false);
+      log.follow();
+    }
+  }
+
+  $('#form').addEventListener('submit', (e) => { e.preventDefault(); const t = textEl.value; textEl.value = ''; autosize(); submit({ kind: 'message', text: t }); });
+  textEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('#form').requestSubmit(); } });
+  function autosize() { textEl.style.height = 'auto'; textEl.style.height = Math.min(textEl.scrollHeight, 160) + 'px'; sendBtn.disabled = busy || !textEl.value.trim(); }
+  textEl.addEventListener('input', autosize);
+
+  /* ---------------- Boot ---------------- */
+  const EXAMPLES = [
+    'Find a plumber for my kitchen tap this week, mornings only, under ₹1,500',
+    'Move my AC servicing to Saturday',
+    'Book the same electrician as last time, but not before 10 a.m.',
+    'What do people say about Sharma Plumbing?',
+  ];
+  function intro() {
+    const ex = el('div', { class: 'examples' }, ...EXAMPLES.map((t) => {
+      const b = el('button', { class: 'chip', type: 'button', text: t });
+      b.addEventListener('click', () => submit({ kind: 'message', text: t }));
+      return b;
+    }));
+    return el('div', { class: 'intro' }, el('h1', { text: 'Book, move or cancel a home service' }),
+      el('p', { text: 'Plumbers, electricians, AC servicing, cleaning and carpenters in Indiranagar, Koramangala, HSR Layout and Whitefield.' }),
+      el('p', { class: 'how', text: 'Every step the agent takes appears in the conversation and in the trace. Click a step to see the exact call and result.' }), ex);
+  }
+
+  async function boot() {
+    approvals.clear();
+    log.reset();
+    inspector.resetTrace();
+    setChips([]);
+    let snap;
+    try { snap = await get(`/api/snapshot?session_id=${sessionId}`); }
+    catch (e) { setConn('offline'); log.add(noticeEl('error', 'Can’t reach the agent. Start it with “make demo” and reload.')); return; }
+    modelLabel = describeModel(snap.model);
+    setConn('online');
+    setClock(snap.clock);
+    inspector.lastState = {};
+    inspector.setState(snap.state, true);
+    inspector.setMemory(snap.memory, true);
+    inspector.setOutbox(snap.outbox, true);
+    inspector.setFaults(snap.faults);
+    (snap.trace || []).forEach((e) => inspector.addTrace(e, true));
+    if (!snap.transcript.length) log.add(intro());
+    for (const m of snap.transcript) {
+      if (m.role === 'user') log.add(el('div', { class: 'turn user' }, el('p', { class: 'bubble', text: m.text.startsWith('[') ? cap(m.text.slice(1, -1)) : m.text })));
+      else log.add(el('article', { class: 'turn agent history' }, el('div', { class: 'reply' }, el('span', { class: 'reply-text', text: m.text }))));
+    }
+    if (snap.approval) { const t = new TurnView(); t.attach(approvalCard(snap.approval)); t.end(); }
+    selectTab('trace');
+    setBusy(false);
+    if (snap.open_writes) { log.add(noticeEl('info', 'Found unfinished work from before. Checking it first.')); await runStream('/api/resume', {}); }
+  }
+
+  $('#newChat').addEventListener('click', () => { if (busy) return; sessionId = newSessionId(); try { localStorage.setItem('errand-session', sessionId); } catch (e) { /* ignore */ } boot(); });
+
+  const root = document.documentElement;
+  const applyTheme = (t) => { if (t) root.dataset.theme = t; else delete root.dataset.theme; };
+  try { applyTheme(localStorage.getItem('errand-theme')); } catch (e) { /* storage unavailable */ }
+  $('#theme').addEventListener('click', () => {
+    const cur = root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('errand-theme', next); } catch (e) { /* storage unavailable */ }
+  });
+  const insp = $('#inspector');
+  const openBtn = $('#inspectorOpen');
+  const setInspector = (open) => { insp.classList.toggle('open', open); openBtn.setAttribute('aria-expanded', String(open)); if (open) $('#tab-trace').focus(); };
+  openBtn.addEventListener('click', () => setInspector(!insp.classList.contains('open')));
+  $('#inspectorClose').addEventListener('click', () => { setInspector(false); openBtn.focus(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && insp.classList.contains('open')) setInspector(false); });
+
+  boot();
+})();
+</script>
+</body>
+</html>

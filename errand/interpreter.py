@@ -9,8 +9,12 @@ from .llm.prompts import INTERPRETER_SYSTEM, INTERPRETER_TOOL
 
 
 class Interpreter:
-    def __init__(self, model: Model) -> None:
+    """``fallback`` (the offline rule model) takes over for a turn when the live model is unreachable
+    (network or HTTP error), so a provider outage degrades understanding instead of stopping the agent."""
+
+    def __init__(self, model: Model, fallback: Model | None = None) -> None:
         self.model = model
+        self.fallback = fallback
 
     def interpret(self, ctx, context: dict, message: str) -> Intent:
         if contains_untrusted(context):
@@ -24,6 +28,11 @@ class Interpreter:
             ctx.budget.charge_model()
             resp = self.model.complete(req)
             ctx.budget.add_cost(resp.cost_usd)
+            if resp.data is None and self.fallback is not None and (resp.error or "").startswith(("HTTP", "network")):
+                ctx.trace.emit("model_call", purpose="interpret", attempt=attempt,
+                               error=f"{resp.error[:120]}; falling back to {self.fallback.name}", **_usage(resp))
+                ctx.budget.charge_model()
+                resp = self.fallback.complete(req)
             try:
                 if resp.data is None:
                     raise IntentError(resp.error or "no output")
