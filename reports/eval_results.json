@@ -1,7 +1,7 @@
 {
- "passed": 32,
- "total": 32,
- "git": "7a0c069",
+ "passed": 33,
+ "total": 33,
+ "git": "09ebb8d",
  "results": [
   {
    "id": "S01",
@@ -399,6 +399,18 @@
    ],
    "expected": "nothing booked; approval declined; options again",
    "actual": "declined",
+   "passed": true,
+   "notes": "3 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S33",
+   "title": "Forget in one session; another open session drops it too",
+   "covers": [
+    "memory"
+   ],
+   "expected": "the other session stops using the forgotten area and asks again",
+   "actual": "area in other session: None",
    "passed": true,
    "notes": "3 checks, 10 invariants",
    "error": null

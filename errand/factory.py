@@ -41,6 +41,8 @@ def build(settings: Settings, clock: Clock | None = None, mock_config: MockConfi
     provider = MockProvider(os.path.join(settings.data_dir, "provider.db"), clock, mock_config or MockConfig(),
                             settings.user_id)
     db = AgentDB(os.path.join(settings.data_dir, "agent.db"))
-    agent = AgentService(settings, db, provider, model or build_model(settings), clock, IdFactory(seed),
+    boot = db.next_boot(clock.now().isoformat())
+    ids = IdFactory(None if seed is None else seed * 1000 + boot)
+    agent = AgentService(settings, db, provider, model or build_model(settings), clock, ids,
                          os.path.join(settings.data_dir, "traces"))
     return World(agent, provider, db, clock, settings)

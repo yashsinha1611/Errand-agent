@@ -96,13 +96,20 @@ def i4_claims_verified(h: Harness):
 
 
 def i5_forgotten_never_used(h: Harness):
-    """I5 No forgotten fact is used after it was forgotten."""
+    """I5 No forgotten fact is used after it was forgotten, in any session."""
+    import json
     facts = {f["id"]: f for f in h.facts()}
     for e in h.traces():
         if e["type"] == "memory_use":
             f = facts.get(e.get("fact_id"))
             if f and f["forgotten_at"] and f["forgotten_at"] <= e["ts"]:
                 return False, f"used forgotten fact {f['key']}"
+    # A forgotten value must not linger in a saved state that a later turn would act on.
+    for row in h.agent.db.q("SELECT session_id, state_json, updated_at FROM sessions"):
+        for name, slot in json.loads(row["state_json"]).get("slots", {}).items():
+            f = facts.get(slot.get("fact_id"))
+            if f and f["status"] == "forgotten" and f["forgotten_at"] < row["updated_at"]:
+                return False, f"{row['session_id']} still holds forgotten {f['key']} after saving"
     return True, "ok"
 
 

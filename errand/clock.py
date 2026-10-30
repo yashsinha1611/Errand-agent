@@ -59,6 +59,9 @@ class FakeClock(Clock):
         self._now = start or self.DEFAULT_START
 
     def now(self) -> datetime:
+        # Strictly increasing by one microsecond per read, so trace timestamps order events
+        # exactly (two reads never tie), while staying fully deterministic.
+        self._now += timedelta(microseconds=1)
         return self._now
 
     def sleep(self, seconds: float) -> None:

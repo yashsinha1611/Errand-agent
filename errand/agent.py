@@ -149,6 +149,7 @@ class AgentService:
             if inp.kind != "resume":
                 self.db.add_message(session_id, state.turn, "user", inp.text or f"[{inp.kind}]", [], t0.isoformat())
             try:
+                self._drop_forgotten(ctx)
                 self._recover(ctx)
                 if inp.kind != "resume":
                     self._dispatch(ctx, inp)
@@ -459,7 +460,7 @@ class AgentService:
             s.offers = []
         if "selection" in inval:
             s.selection, s.hold, s.slot_choices = None, None, []
-        if "selection_if_over_budget" in inval and s.selection:
+        if "selection_if_over_budget" in inval and s.selection and "price" in s.selection:
             budget = policy.budget_value(s)
             if budget is not None and s.selection["price"] > budget:
                 self._void_pending(ctx, "the new budget is below this price")
@@ -1301,6 +1302,18 @@ class AgentService:
                 self._finish_change(ctx, appr, outcome, req.get("new_slot"))
 
     # ================================================================== helpers
+    def _drop_forgotten(self, ctx) -> None:
+        """A fact forgotten in another session must not survive in this session's state."""
+        s = ctx.state
+        for name, slot in list(s.slots.items()):
+            fid = slot.get("fact_id")
+            if fid:
+                fact = self.memory.get(fid)
+                if fact is None or fact.status != "active":
+                    del s.slots[name]
+                    s.search_raw, s.offers, s.selection = [], [], None
+                    self._void_pending(ctx, "a remembered detail it relied on was forgotten")
+
     def _prefill_from_memory(self, ctx) -> None:
         s = ctx.state
         facts = self.memory.usable(self.user_id)

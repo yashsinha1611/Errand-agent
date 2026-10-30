@@ -456,3 +456,20 @@ def s32(h: Harness) -> str:
     h.expect([a["status"] for a in h.approvals()] == ["declined"], "approval declined")
     h.expect(bool(r.options), "options shown again")
     return "declined"
+
+
+@scenario("S33", "Forget in one session; another open session drops it too", ["memory"],
+          "the other session stops using the forgotten area and asks again")
+def s33(h: Harness) -> str:
+    h.say("Remember Indiranagar as my area")
+    h.new_session()
+    first = h.session
+    h.say("Find a plumber tomorrow")
+    h.expect(h.state().slot("area") == "Indiranagar", "area pre-filled in the open session")
+    h.new_session()
+    h.say("Forget my area")
+    h.session = first
+    r = h.say("any time is fine")
+    h.expect(h.state().slot("area") is None, "forgotten area dropped from the other session")
+    h.expect("area" in r.text.lower(), "area asked again")
+    return f"area in other session: {h.state().slot('area')}"

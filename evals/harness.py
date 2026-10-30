@@ -62,7 +62,7 @@ class Harness:
     # ------------------------------------------------------------------ lifecycle
     def _build(self) -> World:
         return build(self.settings, clock=self.clock, mock_config=self.mock_config, model=self.model,
-                     seed=self.seed + self.crashes)
+                     seed=self.seed)
 
     @property
     def agent(self):
@@ -115,6 +115,9 @@ class Harness:
         except InjectedCrash:
             crashed = True
             self.crashes += 1
+        if not crashed:  # the action never reached the crash point: disarm so it can't fire later
+            while self.mock.take_fault("agent"):
+                pass
         self.restart()
         return crashed
 

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS memory_facts (
     confirmed_at TEXT, forgotten_at TEXT, evidence TEXT NOT NULL, created_at TEXT, updated_at TEXT);
 CREATE TABLE IF NOT EXISTS memory_tombstones (
     user_id TEXT, key TEXT, forgotten_at TEXT, PRIMARY KEY (user_id, key));
+CREATE TABLE IF NOT EXISTS boots (n INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT);
 CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT, turn INTEGER, role TEXT, text TEXT,
     claims TEXT, created_at TEXT);
@@ -108,6 +109,11 @@ class AgentDB:
     def sessions_with_open_writes(self) -> list[str]:
         rows = self.q("SELECT DISTINCT session_id FROM outbox WHERE status IN ('SENT', 'UNRESOLVED')")
         return [r["session_id"] for r in rows]
+
+    def next_boot(self, now: str) -> int:
+        """Counts process starts. Mixed into seeded id generation so ids never repeat after a restart."""
+        with self._lock:
+            return self.conn.execute("INSERT INTO boots (at) VALUES (?)", (now,)).lastrowid
 
     # ------------------------------------------------------------------ transcript
     def add_message(self, session_id: str, turn: int, role: str, text: str, claims: list[str], now: str) -> None:
