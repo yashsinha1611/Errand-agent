@@ -32,7 +32,7 @@ ALLOW: dict[str, set[str]] = {
     "injection_suspected": {"provider_id", "review_hash", "rule"},
     "recovery": {"key", "op", "status"},
     "crash": {"point"},
-    "error": {"type", "message"},
+    "error": {"error_type", "message"},
 }
 SECRET = re.compile(r"(sk-ant-[A-Za-z0-9_\-]{8,}|x-api-key[^,}\]]*|Bearer\s+[A-Za-z0-9._\-]+)", re.I)
 CONTENT_FIELDS = {"text", "reply"}
@@ -80,7 +80,7 @@ def summarize(ev: dict) -> str:
     if t in ("turn_start", "turn_end"):
         return str(ev.get("outcome") or ev.get("input_kind") or "")
     if t == "error":
-        return f"{ev.get('type')}: {ev.get('message')}"
+        return f"{ev.get('error_type')}: {ev.get('message')}"
     return ""
 
 
@@ -143,6 +143,9 @@ class TraceRun:
             if k in CONTENT_FIELDS and not self.tracer.capture_content and isinstance(v, str):
                 v = {"sha": sha256(v)[:12], "chars": len(v)}
             clean[k] = scrub(v)
+        reserved = {"run_id", "seq", "ts", "turn", "type"} & clean.keys()
+        if reserved:
+            raise ValueError(f"trace field(s) {sorted(reserved)} would overwrite the event envelope")
         event = {"run_id": self.session_id, "seq": self.tracer.next_seq(self.session_id),
                  "ts": self.tracer.clock.now().isoformat(), "turn": self.turn, "type": type_, **clean}
         line = json.dumps(event, ensure_ascii=False, default=str)

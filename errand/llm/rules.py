@@ -260,6 +260,10 @@ def interpret(message: str, ctx: dict) -> dict:
             return {"kind": "confirm"}
         if NO.search(t) and not details:
             return {"kind": "decline"}
+    # A bare affirmation is a confirmation even when nothing is pending ("yes, book it" said twice).
+    # It must never fall through to task detection, where "book" would start a new booking.
+    if YES.search(t) and not (set(details) - {"provider_ref"}):
+        return {"kind": "confirm"}
 
     if re.search(r"\breviews?\b|what do (people|others|customers|users) say|ratings? (of|for)|how good is|"
                  r"is .{2,30} (any good|reliable|good)", tl):

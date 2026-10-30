@@ -70,6 +70,11 @@ def budget_value(state: ErrandState) -> int | None:
     return b if isinstance(b, int) else None
 
 
+def slot_key(provider_id: str, slot_start: str) -> str:
+    """Excluded slots are per provider: another provider's 09:00 is a different slot."""
+    return f"{provider_id}|{slot_start}"
+
+
 def build_offers(state: ErrandState, now: datetime, prefer_provider_id: str | None = None) -> list[dict]:
     dr = state.slot("date_range")
     hours = state.slot("time_window")
@@ -80,8 +85,10 @@ def build_offers(state: ErrandState, now: datetime, prefer_provider_id: str | No
     for p in state.search_raw:
         if want_id and p["id"] != want_id:
             continue
+        excluded = set(state.excluded_slots)
         slots = [s for s in p["free_slots"]
-                 if in_window(parse_iso(s), tuple(dr) if dr else None, tuple(hours) if hours else None, now)]
+                 if slot_key(p["id"], s) not in excluded
+                 and in_window(parse_iso(s), tuple(dr) if dr else None, tuple(hours) if hours else None, now)]
         if not slots:
             continue
         offers.append({"provider_id": p["id"], "name": p["name"], "rating": p["rating"], "jobs": p.get("jobs", 0),

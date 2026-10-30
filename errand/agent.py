@@ -136,6 +136,9 @@ class AgentService:
         with self._locks[self.user_id]:
             state = self.db.load_state(session_id, self.user_id)
             state.turn += 1
+            # Persist the turn number before doing anything: if this turn crashes, the next one
+            # must not reuse its number, or the trace attributes this turn's actions to the next.
+            self.db.save_state(state, self.clock.now().isoformat())
             trace = self.tracer.run(session_id, state.turn, on_event)
             by = UserTurnRef.issue(session_id, state.turn, turn_token())
             budget = Budget(self.settings.caps, self.clock, state,
@@ -155,7 +158,7 @@ class AgentService:
             except InjectedCrash:
                 raise
             except Exception as exc:  # noqa: BLE001 - the one deliberate catch-all, at the boundary
-                trace.emit("error", type=type(exc).__name__, message=str(exc)[:300])
+                trace.emit("error", error_type=type(exc).__name__, message=str(exc)[:300])
                 ctx.parts = [narrate.unexpected_exit(type(exc).__name__, self._truth(state))]
                 ctx.options, ctx.approval, ctx.outcome = [], None, "error"
             text = "\n\n".join(ctx.parts).strip()
@@ -690,8 +693,7 @@ class AgentService:
         self._resolve_provider_slot(ctx)
         pref = (s.slot("provider") or {}).get("id") if isinstance(s.slot("provider"), dict) else None
         now = self.clock.now()
-        s.offers = [o for o in policy.build_offers(s, now, prefer_provider_id=pref)
-                    if o["slot_start"] not in s.excluded_slots]
+        s.offers = policy.build_offers(s, now, prefer_provider_id=pref)
         if s.selection is None:
             within = [o for o in s.offers if o["within_budget"]]
             if not within:
@@ -774,7 +776,7 @@ class AgentService:
         if not res.ok:
             if res.error_class != "OPTION_GONE":
                 self._raise_unexpected(res)
-            s.excluded_slots.append(sel["slot_start"])
+            s.excluded_slots.append(policy.slot_key(sel["provider_id"], sel["slot_start"]))
             s.selection, s.hold = None, None
             ctx.say(f"{sel['name']}’s {fmt_short_slot(sel['slot_start'])} slot was just taken.")
             self._advance_book(ctx)
@@ -827,7 +829,7 @@ class AgentService:
                 ctx.ui({"type": "approval_update", "id": appr.id, "status": "void", "reason": reason})
                 s.pending_approval_id, s.hold = None, None
                 if s.selection:
-                    s.excluded_slots.append(s.selection["slot_start"])
+                    s.excluded_slots.append(policy.slot_key(s.selection["provider_id"], s.selection["slot_start"]))
                 s.selection = None
                 ctx.say("While the approval was waiting, that slot was taken. Nothing was booked.")
                 self._advance_book(ctx)
@@ -972,7 +974,7 @@ class AgentService:
             ctx.ui({"type": "approval_update", "id": appr.id, "status": "void", "reason": reasons[kind]})
         if kind == "option_gone":
             if s.selection:
-                s.excluded_slots.append(s.selection["slot_start"])
+                s.excluded_slots.append(policy.slot_key(s.selection["provider_id"], s.selection["slot_start"]))
             s.selection, s.hold = None, None
             ctx.say("That slot was taken by someone else just as I tried to book it. Nothing was booked, and I "
                     "didn’t retry it.")
@@ -1094,7 +1096,8 @@ class AgentService:
                 entry = next((p for p in res.value if p["id"] == tb["provider_id"]), None)
                 now = self.clock.now()
                 slots = [x for x in (entry or {}).get("free_slots", [])
-                         if x != tb["slot_start"] and x not in s.excluded_slots and parse_iso(x) > now
+                         if x != tb["slot_start"] and policy.slot_key(tb["provider_id"], x) not in s.excluded_slots
+                         and parse_iso(x) > now
                          and hours[0] <= parse_iso(x).hour <= hours[1]]
                 st.done(f"{len(slots)} free slot{'s' if len(slots) != 1 else ''} {narrate.date_phrase(s)}",
                         detail={"tool": "search_providers", "provider_id": tb["provider_id"], "slots": slots[:6]})
@@ -1217,7 +1220,7 @@ class AgentService:
         if kind == "conflict":
             ctx.ui({"type": "approval_update", "id": appr.id, "status": "void",
                     "reason": "Voided: that slot clashed on the provider’s side. Nothing changed."})
-            s.excluded_slots.append(new_slot)
+            s.excluded_slots.append(policy.slot_key(tb.get("provider_id", ""), new_slot))
             s.selection = None
             ctx.say("That slot clashed with another booking on the provider’s side, so nothing changed and I "
                     "didn’t retry it.")
