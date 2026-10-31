@@ -15,9 +15,9 @@ make demo     # web console with streaming chat and live trace: http://127.0.0.1
 make chat     # the same agent in the terminal
 ```
 
-No `make` (Windows): `python -m unittest discover -s tests -t . && python -m evals.run`, then
-`python -m errand serve`. Optional live model: set `ANTHROPIC_API_KEY` (and optionally `ERRAND_MODEL`, default
-`claude-haiku-5-5`). Without a key the offline rule model is used; tests never call a network.
+Python 3.11+ only; nothing to install. **Step-by-step guide, including Windows, Claude and troubleshooting:
+[`docs/RUNNING.md`](docs/RUNNING.md).** To use Claude, put `ANTHROPIC_API_KEY=…` in a `.env` file (git-ignored)
+or export it; without a key the offline rule model is used, and tests never call a network.
 
 ## Where each must-have is enforced and proven
 

@@ -52,6 +52,7 @@ class Settings:
 
     @staticmethod
     def from_env() -> "Settings":
+        load_dotenv()
         key = os.environ.get("ANTHROPIC_API_KEY") or None
         model = os.environ.get("ERRAND_MODEL") or ("claude-haiku-5-5" if key else "rule")
         return Settings(
@@ -61,3 +62,18 @@ class Settings:
             trace_capture_content=os.environ.get("TRACE_CAPTURE_CONTENT", "true").lower() != "false",
             demo_mode=os.environ.get("ERRAND_DEMO", "1") == "1",
         )
+
+
+def load_dotenv(path: str = ".env") -> None:
+    """Read KEY=VALUE lines from .env into the environment (existing variables win). Standard library only."""
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key, value = key.strip(), value.strip().strip('"').strip("'")
+            if key and value and key not in os.environ:
+                os.environ[key] = value
