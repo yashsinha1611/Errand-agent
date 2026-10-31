@@ -10,7 +10,7 @@ uses a supervisor so the crash demo really restarts the process. That fits one s
 | Option | Fit | Why |
 | --- | --- | --- |
 | **Lightsail instance** (recommended) | Best | One VM, fixed monthly price, static IP, snapshots. Simplest console. |
-| **EC2 instance** | Good | The same steps on EC2; more knobs (security groups, IAM, EBS). |
+| **EC2 instance** | Good | Same setup script; step-by-step below. |
 | ECS Express Mode (containers) | Later | AWS's recommended container path. Needs persistent storage or Postgres first, because container disks are wiped on restart. A `Dockerfile` is included. |
 | App Runner | No | Closed to new customers since 30 April 2026. |
 | Lambda | No | Long streaming responses and local SQLite don't suit it. |
@@ -64,11 +64,59 @@ curl -u demo:YOUR_PASSWORD https://13-233-45-67.sslip.io/api/health
 
 Open the URL in a browser, log in, and the header should show **Claude: claude-haiku-5-5**.
 
-## On EC2 instead
+## Deploy on EC2 (step by step)
 
-Launch an **Ubuntu 24.04** instance (a small `t4g` or `t3` size is enough) in ap-south-1, attach an
-**Elastic IP**, and use a security group that allows 443 and 80 from anywhere and 22 from your IP only. Then
-follow steps 2 to 6 above with `ubuntu@<elastic-ip>` and your key pair.
+**1. Launch the instance.** EC2 console → region **Asia Pacific (Mumbai) ap-south-1** → *Launch instance*:
+
+| Setting | Choose |
+| --- | --- |
+| Name | `errand` |
+| AMI | **Ubuntu Server 24.04 LTS**, 64-bit **(x86)** |
+| Instance type | `t3.small` (2 GB). `t3.micro` (1 GB) also runs it if you want the cheapest option. |
+| Key pair | *Create new key pair* → RSA → `.pem` → download it (you get it only once) |
+| Network settings | *Create security group* with three rules: **SSH** from **My IP**; **HTTPS** from anywhere; **HTTP** from anywhere (needed to issue the certificate) |
+| Storage | 8–16 GB gp3 is plenty |
+
+Click *Launch instance*.
+
+**2. Give it a fixed address.** *Elastic IPs* → *Allocate Elastic IP address* → *Allocate* → select it →
+*Actions → Associate* → choose the `errand` instance. Note the IP, say `13.233.45.67`.
+
+**3. Get a hostname.** Point your domain's `A` record at the Elastic IP, or use `13-233-45-67.sslip.io`.
+
+**4. Copy the code and connect.** On macOS/Linux, first run `chmod 400 errand.pem`. On Windows PowerShell,
+`scp` and `ssh` are built in; if ssh complains the key is too open, right-click the file → Properties → Security
+and leave only your own user.
+
+```bash
+scp -i errand.pem errand-agent.zip ubuntu@13.233.45.67:~
+ssh -i errand.pem ubuntu@13.233.45.67
+sudo apt-get update && sudo apt-get install -y unzip
+unzip errand-agent.zip && cd errand-agent
+```
+
+**5. Install and start everything:**
+
+```bash
+sudo DOMAIN=13-233-45-67.sslip.io ./deploy/setup.sh
+```
+
+Save the printed user and password.
+
+**6. Add your key and restart:**
+
+```bash
+sudo nano /etc/errand/errand.env          # ANTHROPIC_API_KEY=sk-ant-...
+sudo systemctl restart errand
+curl -u demo:YOUR_PASSWORD https://13-233-45-67.sslip.io/api/health
+```
+
+**7. Guard the bill.** *Billing → Budgets → Create budget* → a monthly cost budget of a few dollars with an
+email alert. Public IPv4 addresses, including an attached Elastic IP, are billed hourly, so when you're done:
+terminate the instance, then *release* the Elastic IP.
+
+**If something fails:** `sudo journalctl -u errand -n 50` (app), `sudo journalctl -u caddy -n 50` (HTTPS). A
+certificate error almost always means port 80 is closed or the hostname doesn't point at the Elastic IP yet.
 
 ## Running it
 
