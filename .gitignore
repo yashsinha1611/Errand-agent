@@ -2,3 +2,5 @@ var/
 __pycache__/
 *.pyc
 .env
+evals/data/recordings/
+evals/fixtures/claude/

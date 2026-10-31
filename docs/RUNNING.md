@@ -140,13 +140,12 @@ Run `make check-llm` first (three probes, no fallback, clear error hints). Then 
 [`docs/TESTING.md`](TESTING.md): automated checks (`make intent-eval MODEL=claude RECORD=1`,
 `make live-scenarios`) and a hands-on script covering every feature, guardrail and injection.
 
-To make the scenarios replayable offline against Claude's real outputs (what the brief means by a "recorded
-model"), record once and commit the folder:
+To replay the scenarios offline against Claude's real outputs, record them locally once. Generated recordings
+are git-ignored and are not included in this repository:
 
 ```
 make record-scenarios          # one live pass, a few cents; writes evals/data/recordings/scenarios/<model>/
 make evals-recorded            # from then on: offline, no key, same result every time
-git add evals/data/recordings && git commit -m "Record scenarios on Claude"
 ```
 
 If you change the prompt later, replay marks the affected scenarios STALE; record again.
@@ -158,21 +157,22 @@ make intent-eval MODEL=claude RECORD=1        # Windows: python -m evals.intent_
 ```
 
 This scores Claude on all three golden suites (184 messages, about 4 cents) and writes `reports/intent_eval.md`.
-`RECORD=1` saves every Claude answer under `evals/fixtures/claude/`, so you can replay them offline at no cost:
+`RECORD=1` saves every Claude answer locally under the git-ignored `evals/fixtures/claude/`, so you can replay
+them offline at no cost on that machine. These generated fixtures are not included in this repository:
 
 ```
 make intent-eval MODEL=recorded               # Windows: python -m evals.intent_eval --model recorded
 ```
 
-Commit the fixtures if you want CI to check Claude's answers without a key. Add Claude's numbers to the README
-next to the rule model's: regression, adversarial (confirm false positives must be 0) and capability, where
-Claude should clearly beat the rule model on Devanagari, Kannada-English and messy phrasing.
+Add Claude's numbers to the README next to the rule model's: regression, adversarial (confirm false positives
+must be 0) and capability, where Claude should clearly beat the rule model on Devanagari, Kannada-English and
+messy phrasing.
 
 ## 7. Record the demo
 
-Follow `docs/DEMO.md`. Start with **Faults → Reset world** so booking ids begin at B-2041, keep the Trace tab
-visible, and put a terminal next to the browser for the crash step: the process really exits and the
-supervisor restarts it.
+Use the five-minute tour in section 3 above. Start with **Faults → Reset world** so booking ids begin at B-2041,
+keep the Trace tab visible, and put a terminal next to the browser for the crash step: the process really exits
+and the supervisor restarts it.
 
 ## Troubleshooting
 

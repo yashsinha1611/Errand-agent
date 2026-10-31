@@ -5,7 +5,7 @@ PY ?= python3
 test:            ## unit tests, negative controls, fuzz, intent eval and 42 scenarios -> reports/
 	$(PY) -m unittest discover -s tests -t . && $(PY) -m evals.intent_eval && $(PY) -m evals.run
 
-record-scenarios: ## record Claude's outputs for every scenario once (needs ANTHROPIC_API_KEY); commit the folder
+record-scenarios: ## record Claude's outputs locally for every scenario once (needs ANTHROPIC_API_KEY)
 	$(PY) -m evals.recorded --record $(if $(MODEL),--model $(MODEL),)
 
 evals-recorded:  ## replay all scenarios offline from the recording: Claude's real outputs, no key, no network

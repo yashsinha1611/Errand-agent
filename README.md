@@ -36,7 +36,7 @@ To test every feature and guardrail with Claude (`make check-llm`, `make live-sc
 | 5. Bounded execution | `budget.Budget` (model, tool, step, wall clock, cost); one boundary handler; replies from the outbox truth | S24, S25, S26, S27; invariant I8, I9 |
 | 6. Memory | `memory.MemoryStore`: stated vs inferred, confirm, view, correct, forget with tombstones | S18, S19, S20, S33; `MemoryTest`; invariants I5, I6 |
 | 7. Traces | `tracing.Tracer`: one JSONL per run, allowlist redaction, OTel `gen_ai.*` names, tokens and cost | `TracingTest`; invariant I10; `docs/traces/` |
-| 8. Evals | `evals/`: 42 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz. The same scenarios replay offline from recorded Claude outputs | `make test`, `make evals-recorded` |
+| 8. Evals | `evals/`: 42 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz. Optional Claude recordings are local and git-ignored | `make test`, `make evals-recorded` |
 
 ## Deliverables
 
@@ -48,14 +48,15 @@ To test every feature and guardrail with Claude (`make check-llm`, `make live-sc
 | Three real bugs with fixes and regression tests | [`docs/BUGS.md`](docs/BUGS.md) |
 | End-to-end trace with timeout-after-success | [`docs/traces/timeout_after_success.jsonl`](docs/traces/timeout_after_success.jsonl); annotated in the design note |
 | Design note as PDF (checked: 2 pages) | [`docs/DESIGN.pdf`](docs/DESIGN.pdf) |
-| Recorded demo (3–5 min) | **DEMO LINK** · run sheet: [`docs/DEMO.md`](docs/DEMO.md) |
+| Recorded demo (3–5 min) | Not included in this repository |
 
 ### Scenarios on a recorded model
 
 The brief asks for evals against "a scripted or recorded model". `make test` runs every scenario against the
 deterministic offline interpreter plus scripted models that misbehave on purpose. `make evals-recorded` runs the
-same 42 scenarios against **Claude's real outputs**, recorded once with a key (`make record-scenarios`, a few
-cents) into `evals/data/recordings/scenarios/`. Replay never touches the network, and it is strict: a prompt
+same 42 scenarios against **Claude's real outputs**, recorded locally once with a key (`make record-scenarios`, a few
+cents) into the git-ignored `evals/data/recordings/scenarios/`. Recordings are not included in this repository.
+Replay never touches the network, and it is strict: a prompt
 missing from the recording (because the prompt or a scenario changed) marks that scenario STALE instead of
 letting another model answer. `RecordedReplayTest` checks record, offline replay and stale detection.
 
@@ -69,7 +70,7 @@ verifies them first, so an edited golden file fails loudly. Changes ship as a ne
 | --- | --- | --- | --- | --- |
 | regression | 130 | Everyday phrasing grounded in SGD, Taskmaster-1, CLINC150 and Hinglish-TOP, plus handwritten Hinglish and two-step synthetic rows | test-split strict ≥ 95%, Hinglish ≥ 95%, out-of-scope actions ≤ 5% | 100% |
 | adversarial | 12 | Confirm traps and user-side injections, kept separate so accuracy can't hide a safety failure | zero false confirmations | 91.7%, 0 false confirmations |
-| capability | 42 | Harder phrasing: voice-style rambles, abbreviations, corrections, emoji, two requests, Devanagari, Kannada-English | tracked, not gated | 40.5% (headroom) |
+| capability | 42 | Harder phrasing: voice-style rambles, abbreviations, corrections, emoji, two requests, Devanagari, Kannada-English | tracked, not gated | 45.2% (headroom) |
 
 Baseline before the dev-driven parser fixes: 45% strict accuracy, 4 false confirmations, 41% of out-of-scope
 requests turned into actions. Release note: [`evals/data/golden/v1/RELEASE.md`](evals/data/golden/v1/RELEASE.md);
@@ -81,7 +82,8 @@ provenance and licences: [`evals/data/SOURCES.md`](evals/data/SOURCES.md); repor
 Cohen's kappa and the rows to adjudicate.
 
 **Live model.** `ANTHROPIC_API_KEY=… make intent-eval MODEL=claude RECORD=1` scores Claude on all three suites and
-records its outputs; `make intent-eval MODEL=recorded` replays them offline.
+stores outputs locally under the git-ignored `evals/fixtures/claude/`; `make intent-eval MODEL=recorded` replays
+them offline on that machine.
 
 **Hinglish.** The agent understands Hindi-English code-mixed requests ("kal subah plumber chahiye Indiranagar
 mein, 1500 se kam", "pehla wala", "haan book kar do"), in both the rule model and the Claude prompt. Replies stay
@@ -116,8 +118,8 @@ web/index.html     the console (single file, no build step)
 
 ## Limits and next steps
 
-- The test suite stays offline. Claude's behaviour enters it through recordings: `make record-scenarios` captures
-  Claude's outputs once, and `make evals-recorded` replays them in CI with no key.
+- The test suite stays offline. `make record-scenarios` can capture Claude's outputs locally, and
+  `make evals-recorded` replays them without a key. Generated recordings are git-ignored and are not included.
 - The rule model understands the brief's phrasings and common variants, not open-ended language; that is the
   live model's job.
 - Holds have no release call in the contract, so abandoned holds lapse after 10 minutes.
