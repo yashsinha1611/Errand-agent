@@ -1,6 +1,6 @@
 # Interpreter eval: rule-v1
 
-Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · generated 2026-10-31 12:32 by `python -m evals.intent_eval`. Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.
+Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · generated 2026-10-31 21:47 by `python -m evals.intent_eval`. Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.
 
 ## Suites
 
