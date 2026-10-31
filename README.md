@@ -58,8 +58,8 @@ data and traces are written locally under `var/`.
 5. **Crash recovery:** arm the crash-after-send fault, approve a booking, and show the server restart and recovery
 	in the trace and outbox.
 
-Reset the mock world before recording. The repository has this run guide, but **does not contain a recorded video
-or a video link**.
+Reset the mock world before recording. The [recorded demo](https://www.loom.com/share/fc4ade6d49b144c8980cdaaf35002201)
+shows the walkthrough above.
 
 ### Run with Claude (optional)
 
