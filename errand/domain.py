@@ -97,7 +97,8 @@ INTENT_KINDS = (
     "ask_reviews", "list_bookings", "greeting", "abort", "unclear",
 )
 DATE_EXPR = re.compile(r"^(today|tomorrow|day_after_tomorrow|this_week|next_week|weekend|"
-                       r"weekday:(mon|tue|wed|thu|fri|sat|sun)|date:\d{4}-\d{2}-\d{2})$")
+                       r"weekday:(mon|tue|wed|thu|fri|sat|sun)|date:\d{4}-\d{2}-\d{2}|"
+                       r"before:(tomorrow|day_after_tomorrow|weekday:(mon|tue|wed|thu|fri|sat|sun)|date:\d{4}-\d{2}-\d{2}))$")
 TIME_EXPR = re.compile(r"^(morning|afternoon|evening|any|after:\d{2}:\d{2}|before:\d{2}:\d{2}|at:\d{2}:\d{2})$")
 MEMORY_KEYS = ("home_area", "earliest_time", "preferred_technician")
 
@@ -111,7 +112,8 @@ INTENT_SCHEMA: dict[str, Any] = {
         "area": {"type": ["string", "null"], "enum": [*AREAS, None]},
         "date_expr": {"type": ["string", "null"],
                       "description": "today | tomorrow | day_after_tomorrow | this_week | next_week | weekend | "
-                                     "weekday:sat | date:YYYY-MM-DD"},
+                                     "weekday:sat | date:YYYY-MM-DD | before:weekday:thu | before:date:YYYY-MM-DD "
+                                     "(a deadline: any day from today until the day before)"},
         "time_expr": {"type": ["string", "null"],
                       "description": "morning | afternoon | evening | any | after:HH:MM | before:HH:MM | at:HH:MM"},
         "budget_inr": {"type": ["integer", "null"], "minimum": 0},
@@ -125,6 +127,13 @@ INTENT_SCHEMA: dict[str, Any] = {
         "memory_key": {"type": ["string", "null"], "enum": [*MEMORY_KEYS, None]},
         "memory_value": {"type": ["string", "null"]},
         "is_correction": {"type": "boolean"},
+        "exclude_providers": {"type": "array", "items": {"type": "string"}, "maxItems": 5,
+                              "description": "Providers the user ruled out, as they named them."},
+        "also_requested": {"type": ["string", "null"],
+                           "description": "A second, separate request in the same message that this intent does "
+                                          "not cover, in a few words (e.g. 'book an electrician the same day')."},
+        "memory_keep": {"type": "array", "items": {"type": "string", "enum": list(MEMORY_KEYS)},
+                        "description": "With memory_op forget and no memory_key: what to keep."},
     },
     "required": ["kind"],
 }
@@ -151,13 +160,17 @@ class Intent:
     memory_key: str | None = None
     memory_value: str | None = None
     is_correction: bool = False
+    exclude_providers: list = field(default_factory=list)
+    also_requested: str | None = None
+    memory_keep: list = field(default_factory=list)
 
     def has_details(self) -> bool:
         return any(v is not None for v in (self.service, self.area, self.date_expr, self.time_expr,
-                                           self.budget_inr, self.provider_ref)) or self.no_budget
+                                           self.budget_inr, self.provider_ref)) or self.no_budget \
+            or bool(self.exclude_providers)
 
     def to_dict(self) -> dict[str, Any]:
-        return {k: v for k, v in asdict(self).items() if v not in (None, False)}
+        return {k: v for k, v in asdict(self).items() if v not in (None, False, [])}
 
 
 def parse_intent(data: Any) -> Intent:
@@ -198,6 +211,16 @@ def parse_intent(data: Any) -> Intent:
     opt("memory_op", lambda v: v in ("remember", "forget", "view", "correct"))
     opt("memory_key", lambda v: v in MEMORY_KEYS)
     opt("memory_value", lambda v: isinstance(v, str) and len(v) <= 60)
+    opt("also_requested", lambda v: isinstance(v, str) and 0 < len(v) <= 160)
+    for name, check in (("exclude_providers", lambda v: isinstance(v, str) and 0 < len(v) <= 60),
+                        ("memory_keep", lambda v: v in MEMORY_KEYS)):
+        v = data.get(name)
+        if v is None:
+            continue
+        if not isinstance(v, list) or len(v) > 5 or not all(check(x) for x in v):
+            raise IntentError(f"bad {name}: {v!r}")
+        if v:
+            clean[name] = list(dict.fromkeys(v))
     for flag in ("no_budget", "is_correction"):
         v = data.get(flag, False)
         if not isinstance(v, bool):
@@ -280,6 +303,7 @@ class ErrandState:
     excluded_slots: list[str] = field(default_factory=list)     # slots that failed this task (taken, conflict)
     unclear_streak: int = 0
     memory_notes: list[str] = field(default_factory=list)  # facts asked about this session
+    deferred: list[dict] = field(default_factory=list)      # second requests to take up next: {"text", "turn"}
     # Session-level budget counters
     model_calls: int = 0
     tool_calls: int = 0
@@ -294,7 +318,7 @@ class ErrandState:
 
     def clear_task(self) -> None:
         keep = {"session_id", "user_id", "version", "turn", "model_calls", "tool_calls", "cost_usd",
-                "memory_notes", "focus_provider", "known_providers", "result_booking_id"}
+                "memory_notes", "focus_provider", "known_providers", "result_booking_id", "deferred"}
         fresh = ErrandState(self.session_id, self.user_id)
         for f in fields(self):
             if f.name not in keep:

@@ -31,7 +31,7 @@ from .provider_client import ProviderClient, Result
 from .storage import AgentDB
 from .timeparse import resolve_time
 from .tracing import Tracer, scrub
-from .util import IdFactory, fmt_day, fmt_inr, fmt_short_slot, fmt_slot, parse_iso, sha256
+from .util import IdFactory, fmt_day, fmt_inr, fmt_short_slot, fmt_slot, parse_iso, sanitize_label, sha256
 
 
 class InjectedCrash(BaseException):
@@ -204,6 +204,25 @@ class AgentService:
         s.unclear_streak = s.unclear_streak + 1 if intent.kind == "unclear" else 0
         handler = getattr(self, f"_on_{intent.kind}")
         handler(ctx, intent, inp, via_button)
+        if intent.also_requested and not via_button:
+            # A second request in the same message is never dropped: it is queued and offered next.
+            text = sanitize_label(intent.also_requested, 120).rstrip(".")
+            s.deferred.append({"text": text, "turn": s.turn})
+            ctx.trace.emit("state_transition", **{"from": s.phase}, to=s.phase, diff={"deferred_request": text})
+            if s.task and s.phase not in ("idle", "done", "failed"):
+                ctx.say(f"I’ll finish this first. After that I’ll come back to your other request: {text}.")
+        self._offer_deferred(ctx)
+
+    def _offer_deferred(self, ctx) -> None:
+        """When nothing else is in progress, offer the next queued request."""
+        s = ctx.state
+        if not s.deferred or s.pending_question or self.gate.pending(s.session_id):
+            return
+        if s.task and s.phase not in ("idle", "done", "failed"):
+            return
+        item = s.deferred.pop(0)
+        s.pending_question = {"kind": "start_deferred", "text": item["text"]}
+        ctx.say(f"You also asked: {item['text']}. Shall I start on that now?")
 
     def _context(self, ctx: TurnContext) -> dict:
         s = ctx.state
@@ -312,9 +331,13 @@ class AgentService:
                     return
                 value = match
             elif key == "earliest_time":
-                if not (len(value) == 5 and value[2] == ":" and value[:2].isdigit()):
-                    ctx.say("Tell me the earliest time like “never before 10 a.m.”.")
+                norm = normalize_clock(value)
+                if norm is None:
+                    ctx.trace.emit("memory_rejected", key=key, reason="time not understood")
+                    ctx.say(f"I couldn’t read “{sanitize_label(value, 20)}” as a time, so I haven’t saved it. "
+                            "Say it like “never before 10 a.m.”.")
                     return
+                value = norm
             elif key == "preferred_technician":
                 prov = policy.match_provider_name(value, s.known_providers)
                 if not prov:
@@ -343,23 +366,45 @@ class AgentService:
             elif intent.memory_key:
                 keys = [intent.memory_key]
             else:
-                keys = ["home_area", "earliest_time", "preferred_technician:"]
-            with ctx.step("Forgetting") as st:
-                n = sum(self.memory.forget(ctx.trace, self.user_id, k, ctx.by) for k in keys)
-                st.done(f"Forgot {n} fact{'s' if n != 1 else ''} and blocked re-inference",
-                        detail={"keys": keys, "tombstoned": True})
-            for name, slot in list(s.slots.items()):
-                fk = slot.get("fact_key") or ""
-                if slot.get("source") == "memory" and any(fk == k or (k.endswith(":") and fk.startswith(k)) for k in keys):
-                    del s.slots[name]
-                    s.search_raw, s.offers, s.selection = [], [], None
-            what = ", ".join(label_for(k.rstrip(":")).lower() if not k.endswith(":") else "preferred providers"
-                             for k in keys)
-            ctx.say(f"Done. I’ve forgotten {what}, and I won’t work it out again from your booking history."
-                    if n else "There was nothing saved for that.")
-            self._push_memory(ctx)
-            if s.task:
-                ctx.say(self._current_question(ctx))
+                self._ask_forget_all(ctx, intent.memory_keep)
+                return
+            self._forget_keys(ctx, keys)
+
+    def _ask_forget_all(self, ctx, keep: list[str]) -> None:
+        """Forgetting everything is destructive: list exactly what goes, and wait for a yes."""
+        s = ctx.state
+        facts = self.memory.view(self.user_id)
+        kept = [f for f in facts if any(f["raw_key"] == k or f["raw_key"].startswith(k + ":") for k in keep)]
+        drop = [f for f in facts if f not in kept]
+        if not drop:
+            ctx.say("There’s nothing else saved, so there’s nothing to forget." if kept
+                    else "I don’t have anything saved about you.")
+            return
+        keys = sorted({f["raw_key"] for f in drop})
+        s.pending_question = {"kind": "confirm_forget", "keys": keys}
+        listed = narrate.join([f"{f['key'].lower()} ({f['value']})" for f in drop])
+        kept_names = [f"{f['key'].lower()} ({f['value']})" for f in kept]
+        kept_txt = f" I’ll keep {narrate.join(kept_names)}." if kept else ""
+        ctx.say(f"This will forget {listed}.{kept_txt} Reply yes to forget them, or no to keep everything.")
+
+    def _forget_keys(self, ctx, keys: list[str]) -> None:
+        s = ctx.state
+        with ctx.step("Forgetting") as st:
+            n = sum(self.memory.forget(ctx.trace, self.user_id, k, ctx.by) for k in keys)
+            st.done(f"Forgot {n} fact{'s' if n != 1 else ''} and blocked re-inference",
+                    detail={"keys": keys, "tombstoned": True})
+        for name, slot in list(s.slots.items()):
+            fk = slot.get("fact_key") or ""
+            if slot.get("source") == "memory" and any(fk == k or (k.endswith(":") and fk.startswith(k)) for k in keys):
+                del s.slots[name]
+                s.search_raw, s.offers, s.selection = [], [], None
+        what = ", ".join(label_for(k.rstrip(":")).lower() if not k.endswith(":") else "preferred providers"
+                         for k in keys)
+        ctx.say(f"Done. I’ve forgotten {what}, and I won’t work it out again from your booking history."
+                if n else "There was nothing saved for that.")
+        self._push_memory(ctx)
+        if s.task:
+            ctx.say(self._current_question(ctx))
 
     # ================================================================== reviews (untrusted text)
     def _on_ask_reviews(self, ctx, intent, inp, via_button) -> None:
@@ -470,6 +515,10 @@ class AgentService:
             s.offers = []
         if "selection" in inval:
             s.selection, s.hold, s.slot_choices = None, None, []
+        if "selection_if_excluded" in inval and s.selection and s.selection.get("name") \
+                and policy.is_excluded(s.selection["name"], s.slot("exclude")):
+            self._void_pending(ctx, f"you ruled out {s.selection['name']}")
+            s.selection, s.hold = None, None
         if "selection_if_over_budget" in inval and s.selection and "price" in s.selection:
             budget = policy.budget_value(s)
             if budget is not None and s.selection["price"] > budget:
@@ -491,6 +540,12 @@ class AgentService:
                 values["provider"] = {"value": {"id": p["id"], "name": p["name"]}, "ref": values["provider"]["ref"]}
                 if "service" not in values and s.slot("service") is None:
                     values["service"] = {"value": p["service"]}
+        if "exclude" in values:  # exclusions accumulate within a task
+            merged = {x.lower(): x for x in (s.slot("exclude") or []) + values["exclude"]["value"]}
+            values["exclude"] = {"value": sorted(merged.values(), key=str.lower)}
+            prov = s.slot("provider")
+            if isinstance(prov, dict) and prov.get("name") and policy.is_excluded(prov["name"], values["exclude"]["value"]):
+                s.slots.pop("provider", None)
         before = {k: s.slot(k) for k in values}
         changed = policy.apply_details(s, values, "user")
         corrected = {k for k in changed if before.get(k) is not None}
@@ -556,6 +611,10 @@ class AgentService:
              "cancel": self._execute_change}[appr.action](ctx, appr)
             return
         if s.pending_question:
+            if s.pending_question.get("kind") == "confirm_forget" and not via_button \
+                    and not is_affirmation(inp.text or ""):
+                ctx.say("I need a clear yes from you before I forget anything. " + self._current_question(ctx))
+                return
             self._answer_question(ctx, True)
             return
         self._already_done(ctx)
@@ -642,6 +701,26 @@ class AgentService:
             s.clear_task()
             self._set_phase(ctx, "idle")
             ctx.say("Okay, I’ve left your bookings as they are.")
+            return
+        elif kind == "confirm_forget":
+            if yes:
+                self._forget_keys(ctx, q.get("keys") or [])
+            else:
+                ctx.say("Okay, I’ve kept everything I had saved.")
+            return
+        elif kind == "start_deferred":
+            if not yes:
+                ctx.say("Okay, I’ll leave that.")
+                return
+            text = q.get("text") or ""
+            with ctx.step("Reading your other request") as st:
+                intent = self.interpreter.interpret(ctx, self._context(ctx), text)
+                st.done(_intent_label(intent), detail={"intent": intent.to_dict(), "from": "queued request"})
+            if intent.kind in ("start_task", "provide_details", "memory", "ask_reviews", "list_bookings"):
+                intent.also_requested = None
+                getattr(self, f"_on_{intent.kind}")(ctx, intent, UserInput(text=text), False)
+            else:
+                ctx.say(f"Tell me what you’d like for this: {text}.")
             return
         self._advance(ctx)
 
@@ -732,7 +811,12 @@ class AgentService:
                 s.search_raw = res.value
                 offers = policy.build_offers(s, self.clock.now())
                 fit = sum(1 for o in offers if o["within_budget"])
-                st.done(f"{len(res.value)} found. {fit} fit your time and budget",
+                left_out = [p["name"] for p in res.value if policy.is_excluded(p["name"], s.slot("exclude"))]
+                if left_out:
+                    ctx.trace.emit("state_transition", **{"from": s.phase}, to=s.phase,
+                                   diff={"excluded_providers": left_out})
+                st.done(f"{len(res.value)} found. {fit} fit your time and budget"
+                        + (f", leaving out {narrate.join(left_out)} as you asked" if left_out else ""),
                         detail={"tool": "search_providers", "args": {"service": service, "area": area,
                                                                       "date_range": dr}, "returned": len(res.value),
                                 "fitting": fit})
@@ -1412,6 +1496,10 @@ class AgentService:
             return f"Should I look at {q['provider_name']} first?"
         if q.get("kind") == "choose_booking":
             return "Which booking do you mean? Pick one of the options."
+        if q.get("kind") == "confirm_forget":
+            return "Reply yes to forget them, or no to keep everything."
+        if q.get("kind") == "start_deferred":
+            return f"You also asked: {q.get('text')}. Shall I start on that now?"
         if s.task == "book" and s.phase == "collecting":
             missing = policy.missing_fields(s)
             return narrate.ask_missing(missing, s) if missing else ""
@@ -1510,6 +1598,24 @@ class AgentService:
 
 _LABEL = {"service": "service", "area": "area", "date_range": "date", "time_window": "time", "budget": "budget",
           "provider": "provider"}
+
+
+def normalize_clock(value: str) -> str | None:
+    """'after:10:00', '10:00', '10', '10am', '10 a.m.', '10:30 pm' -> 'HH:MM'. None if it isn't a time."""
+    v = (value or "").strip().lower().replace(".", "")
+    for prefix in ("after:", "at:", "from:"):
+        if v.startswith(prefix):
+            v = v[len(prefix):]
+    import re as _re
+    m = _re.fullmatch(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", v)
+    if not m:
+        return None
+    h, mins, ampm = int(m.group(1)), int(m.group(2) or 0), m.group(3)
+    if ampm == "pm" and h < 12:
+        h += 12
+    if ampm == "am" and h == 12:
+        h = 0
+    return f"{h:02d}:{mins:02d}" if 0 <= h <= 23 and 0 <= mins < 60 else None
 
 
 def _intent_label(i: Intent) -> str:

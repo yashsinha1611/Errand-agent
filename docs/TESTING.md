@@ -15,9 +15,9 @@ Start with **Faults → Reset world** so ids and data are predictable. Use **New
 | --- | --- | --- | --- |
 | 1. Preflight | `make check-llm` (`python -m errand check-llm`) | Three PASS lines: English request, Hinglish yes, injection not confirmed | < $0.001 |
 | 2. Understanding | `make intent-eval MODEL=claude RECORD=1` (`python -m evals.intent_eval --model claude --record`) | Regression ≥ 95%, **adversarial confirm false positives = 0**, capability above the rule model's 40% | ≈ $0.05 |
-| 3. End to end | `make live-scenarios` (`python -m evals.live --trials 3`) | 35 scenarios × 3 trials; all ✓, no `!` | ≈ $0.20 |
+| 3. End to end | `make live-scenarios` (`python -m evals.live --trials 3`) | 40 scenarios × 3 trials; all ✓, no `!` | ≈ $0.25 |
 
-| 4. Hard probes | `make hard-probes` (`python -m evals.hard`) | 73 hard English and Hinglish messages: no SAFETY FAIL; read the misses | ≈ $0.02 |
+| 4. Hard probes | `make hard-probes` (`python -m evals.hard`) | 79 hard English and Hinglish messages: no SAFETY FAIL; read the misses | ≈ $0.04 |
 
 Step 3 runs the same scripted users, faults and ten invariants as the offline suite, but Claude reads every
 message. `!` means that trial fell back to the offline parser (a key, network or HTTP problem), so it doesn't

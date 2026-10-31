@@ -80,7 +80,7 @@ Exactly one `book` call; the provider's own records show one booking with that k
 
 ## Evals
 
-33 scenarios drive the agent with scripted users against the rule model and a seeded mock, and grade outcomes:
+40 scenarios drive the agent with scripted users against the rule model and a seeded mock, and grade outcomes:
 provider bookings, approval and outbox rows, memory rows and traces (the τ-bench idea of grading end state, not
 wording). Ten invariants run after every scenario (for example: every booking has exactly one consumed approval
 whose fingerprint matches it; every write call was preceded by a consume; every claimed booking exists). Three

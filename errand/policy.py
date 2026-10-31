@@ -40,7 +40,19 @@ def detail_values(intent: Intent, now: datetime) -> dict[str, dict]:
         out["budget"] = {"value": "ANY"}
     if intent.provider_ref and intent.provider_ref != "that":
         out["provider"] = {"value": None, "ref": intent.provider_ref}
+    if intent.exclude_providers:
+        out["exclude"] = {"value": sorted(intent.exclude_providers, key=str.lower)}
     return out
+
+
+def is_excluded(name: str, refs: list[str] | None) -> bool:
+    """A provider the user ruled out ("not Arctic Breeze", "BrightSpark ko chhod ke")."""
+    n = name.lower()
+    for ref in refs or []:
+        r = ref.lower().strip()
+        if r and (r in n or n in r or n.split()[0] == r.split()[0]):
+            return True
+    return False
 
 
 def apply_details(state: ErrandState, values: dict[str, dict], source: str) -> set[str]:
@@ -60,9 +72,12 @@ def invalidations(changed: set[str]) -> set[str]:
     """What a change voids downstream. Budget alone only re-filters offers."""
     if changed & SEARCH_KEYS:
         return {"search", "offers", "selection", "hold", "approval"}
+    out: set[str] = set()
     if "budget" in changed:
-        return {"offers", "selection_if_over_budget"}
-    return set()
+        out |= {"offers", "selection_if_over_budget"}
+    if "exclude" in changed:
+        out |= {"offers", "selection_if_excluded"}
+    return out
 
 
 def budget_value(state: ErrandState) -> int | None:
@@ -82,8 +97,11 @@ def build_offers(state: ErrandState, now: datetime, prefer_provider_id: str | No
     provider = state.slots.get("provider") or {}
     want_id = (provider.get("value") or {}).get("id") if isinstance(provider.get("value"), dict) else None
     offers = []
+    excluded_names = state.slot("exclude") or []
     for p in state.search_raw:
         if want_id and p["id"] != want_id:
+            continue
+        if is_excluded(p["name"], excluded_names):
             continue
         excluded = set(state.excluded_slots)
         slots = [s for s in p["free_slots"]

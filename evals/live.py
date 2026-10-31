@@ -1,4 +1,4 @@
-"""Run the 35 scenarios with the live model as interpreter, k times each, and score pass^k.
+"""Run every scenario with the live model as interpreter, k times each, and score pass^k.
 
     python -m evals.live --trials 3               # needs ANTHROPIC_API_KEY (and optionally ERRAND_MODEL)
 

@@ -1,7 +1,7 @@
 {
- "passed": 35,
- "total": 35,
- "git": "2ea57aa",
+ "passed": 40,
+ "total": 40,
+ "git": "dc99cd7",
  "results": [
   {
    "id": "S01",
@@ -441,6 +441,68 @@
    "actual": "no booking",
    "passed": true,
    "notes": "3 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S36",
+   "title": "Ruled-out providers are never offered; ruling one out withdraws its card",
+   "covers": [
+    "state",
+    "approval"
+   ],
+   "expected": "excluded provider absent from options; card for a newly excluded provider voided; nothing booked",
+   "actual": "excluded ['Ravi', 'Sharma']",
+   "passed": true,
+   "notes": "5 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S37",
+   "title": "Two requests in one message: neither is dropped",
+   "covers": [
+    "state",
+    "approval"
+   ],
+   "expected": "first request handled; second queued, offered when the first is done, and started on a yes",
+   "actual": "cancelled, then book electrician",
+   "passed": true,
+   "notes": "5 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S38",
+   "title": "Forget everything asks first and keeps what you name",
+   "covers": [
+    "memory"
+   ],
+   "expected": "nothing deleted before a clear yes; 'except my area' keeps the area; 'no' keeps everything",
+   "actual": "kept ['home_area']",
+   "passed": true,
+   "notes": "5 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S39",
+   "title": "Memory times in other formats are saved; unreadable ones are refused out loud",
+   "covers": [
+    "memory"
+   ],
+   "expected": "'after:10:00' saved as 10:00; an unreadable value is not saved and the refusal is traced",
+   "actual": "earliest_time 10:00",
+   "passed": true,
+   "notes": "3 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S40",
+   "title": "A deadline date only offers slots before it",
+   "covers": [
+    "state"
+   ],
+   "expected": "'before Thursday' resolves to today through Wednesday; every offer falls inside it",
+   "actual": "offers on ['2026-11-02'] (window 2026-11-02..2026-11-04)",
+   "passed": true,
+   "notes": "1 checks, 10 invariants",
    "error": null
   }
  ]

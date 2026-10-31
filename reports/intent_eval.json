@@ -73,7 +73,7 @@
     "all": {
      "n": 42,
      "kind_acc": 0.619,
-     "strict_acc": 0.405,
+     "strict_acc": 0.452,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
      "confirm_recall": 0.2,
@@ -81,25 +81,25 @@
      "fields": {
       "area": 0.667,
       "budget_inr": 0.0,
-      "date_expr": 0.579,
+      "date_expr": 0.632,
       "no_budget": 1.0,
       "provider_ref": 0.667,
-      "service": 0.778,
-      "task": 0.75,
+      "service": 0.833,
+      "task": 0.8,
       "time_expr": 0.429
      }
     },
     "dev": {
      "n": 24,
      "kind_acc": 0.667,
-     "strict_acc": 0.542,
+     "strict_acc": 0.583,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
      "confirm_recall": 0.25,
      "oos_false_action_rate": 0.0,
      "fields": {
       "area": 0.5,
-      "date_expr": 0.636,
+      "date_expr": 0.727,
       "provider_ref": 1.0,
       "service": 0.889,
       "task": 0.818,
@@ -109,7 +109,7 @@
     "test": {
      "n": 18,
      "kind_acc": 0.556,
-     "strict_acc": 0.222,
+     "strict_acc": 0.278,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
      "confirm_recall": 0.0,
@@ -120,8 +120,8 @@
       "date_expr": 0.5,
       "no_budget": 1.0,
       "provider_ref": 0.5,
-      "service": 0.667,
-      "task": 0.667,
+      "service": 0.778,
+      "task": 0.778,
       "time_expr": 0.167
      }
     },
@@ -129,7 +129,7 @@
      "en": {
       "n": 32,
       "kind_acc": 0.625,
-      "strict_acc": 0.406,
+      "strict_acc": 0.469,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": 0.333,
@@ -137,11 +137,11 @@
       "fields": {
        "area": 0.5,
        "budget_inr": 0.0,
-       "date_expr": 0.571,
+       "date_expr": 0.643,
        "no_budget": 1.0,
        "provider_ref": 0.667,
-       "service": 0.769,
-       "task": 0.733,
+       "service": 0.846,
+       "task": 0.8,
        "time_expr": 0.444
       }
      },
@@ -197,7 +197,7 @@
      "capability": {
       "n": 42,
       "kind_acc": 0.619,
-      "strict_acc": 0.405,
+      "strict_acc": 0.452,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": 0.2,
@@ -205,11 +205,11 @@
       "fields": {
        "area": 0.667,
        "budget_inr": 0.0,
-       "date_expr": 0.579,
+       "date_expr": 0.632,
        "no_budget": 1.0,
        "provider_ref": 0.667,
-       "service": 0.778,
-       "task": 0.75,
+       "service": 0.833,
+       "task": 0.8,
        "time_expr": 0.429
       }
      }
@@ -4871,17 +4871,17 @@
    },
    "kind_ok": true,
    "fields": {
-    "date_expr": false,
+    "date_expr": true,
     "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "weekday:tue",
+    "date_expr": "weekday:wed",
     "time_expr": "morning"
    },
    "error": null
@@ -5151,20 +5151,21 @@
    },
    "kind_ok": true,
    "fields": {
-    "task": false,
-    "service": false,
+    "task": true,
+    "service": true,
     "date_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "start_task",
-    "task": "cancel",
-    "service": "ac_servicing",
-    "date_expr": "tomorrow"
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow",
+    "also_requested": "cancel my AC servicing"
    },
    "error": null
   },
@@ -5198,8 +5199,9 @@
    "pred": {
     "kind": "start_task",
     "task": "book",
-    "service": "plumber",
-    "date_expr": "tomorrow"
+    "service": "electrician",
+    "date_expr": "tomorrow",
+    "also_requested": "a plumber tomorrow"
    },
    "error": null
   },

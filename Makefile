@@ -32,8 +32,8 @@ agreement:       ## agreement and Cohen's kappa from a filled review sheet
 check-llm:       ## preflight: three probes against the live model (needs ANTHROPIC_API_KEY)
 	$(PY) -m errand check-llm
 
-live-scenarios:  ## all 35 scenarios with Claude reading every message, TRIALS times each (default 3)
+live-scenarios:  ## all 40 scenarios with Claude reading every message, TRIALS times each (default 3)
 	$(PY) -m evals.live --trials $(or $(TRIALS),3) $(if $(ONLY),--only $(ONLY),)
 
-hard-probes:     ## 73 hard English and Hinglish probes against Claude (MODEL=rule for the offline baseline)
+hard-probes:     ## 79 hard English and Hinglish probes against Claude (MODEL=rule for the offline baseline)
 	$(PY) -m evals.hard --model $(or $(MODEL),claude) $(if $(ONLY),--only $(ONLY),) $(if $(LANG_),--lang $(LANG_),)

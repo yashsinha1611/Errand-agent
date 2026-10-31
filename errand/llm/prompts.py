@@ -17,9 +17,21 @@ is provide_details. kind=decline for a clear no.
 - kind=ask_reviews for questions about a provider's reviews or quality.
 - Dates are symbolic: today, tomorrow, day_after_tomorrow, this_week, next_week, weekend, weekday:sat, \
 date:YYYY-MM-DD. Times: morning, afternoon, evening, after:HH:MM ("not before 10 a.m." = after:10:00), \
-before:HH:MM, at:HH:MM. Never compute calendar dates yourself except date:YYYY-MM-DD the user stated.
+before:HH:MM, at:HH:MM. Never compute calendar dates yourself, except a date the user stated, or the date of \
+a named festival or holiday used as a deadline (before:date:YYYY-MM-DD).
 - Budgets are integers in rupees ("under ₹1,500" = 1500). "No budget" sets no_budget=true.
-- provider_ref: the provider name as said, "last_time" for "same as last time", "that" for "them".
+- provider_ref: the provider name as said, "last_time" for "same as last time", "that" for "them". Only names of \
+businesses or people: never a service word or a misspelling of one ("plumbr" is the plumber service, not a name).
+- The service comes from what needs fixing, never from a provider reference: "the AC guy, but for the fan" is \
+service electrician. A reference to a provider of a different service sets no provider_ref.
+- exclude_providers: providers the user rules out ("not Arctic Breeze", "anyone but BrightSpark", "Sharma wale \
+mat bhejna"). Never put an excluded provider in provider_ref.
+- Deadlines: "before Thursday", "fixed before he comes on Thursday", "Diwali se pehle" use \
+date_expr "before:weekday:thu" or "before:date:YYYY-MM-DD" (any day from today until the day before).
+- One intent per message. If the message also asks for a second, separate thing (another task, another \
+service, saving a fact plus booking), describe it in also_requested in a few words; it will be handled next.
+- Memory: earliest_time values are "HH:MM" only ("10:00", not "after:10:00"). "Forget everything except my \
+area" is memory_op forget with memory_keep ["home_area"] and no memory_key.
 - Services: plumber, electrician, ac_servicing, cleaning, carpenter. Areas: Indiranagar, Koramangala, \
 HSR Layout, Whitefield. Use null when not stated.
 - If the message is not understandable, or asks for something other than home services (hotels, cabs,
@@ -44,7 +56,11 @@ Hinglish (Hindi-English code-mixed, Roman script) is common. Read it the same wa
 - picks: pehla / pehla wala = option 1, doosra / dusra = 2, teesra = 3.
 - tasks: chahiye, bhej do, bula do, karwana hai = book; shift kar do, badal do = reschedule; cancel kar do = cancel.
 - services: nal (tap) = plumber, bijli = electrician, safai = cleaning, badhai / almari = carpenter.
-- memory: "yaad rakho" = remember, "bhool jao" = forget, "kya yaad hai" = view.
+- memory: "yaad rakho" = remember, "bhool jao" = forget, "kya yaad hai" = view. "10 baje se pehle kabhi mat \
+bhejna" (never send anyone before 10) = remember earliest_time "10:00". "sab bhool jao bas area yaad rakho" =
+forget with memory_keep ["home_area"].
+- exclusions: "X ko chhod ke", "X wale mat bhejna", "X nahi chahiye" = exclude_providers [X].
+- deadlines: "guruvar se pehle" = before:weekday:thu.
 
 Examples:
 "Find a plumber for my kitchen tap this week, mornings only, under ₹1,500" -> {"kind":"start_task",\
@@ -62,6 +78,16 @@ Examples:
 "haan book kar do" (approval pending) -> {"kind":"confirm"}
 "theek hai par pehle price batao" (approval pending) -> {"kind":"unclear"}
 "doosra wala" (with options) -> {"kind":"select","option_index":2}
+"book the same guy as my AC service but for the fan" -> {"kind":"start_task","task":"book","service":"electrician"}
+"AC in Koramangala day after tomorrow, not Arctic Breeze" -> {"kind":"start_task","task":"book",\
+"service":"ac_servicing","area":"Koramangala","date_expr":"day_after_tomorrow","exclude_providers":["Arctic Breeze"]}
+"cancel my AC servicing and get an electrician the same day" -> {"kind":"start_task","task":"cancel",\
+"service":"ac_servicing","also_requested":"book an electrician the same day"}
+"plumber before Thursday, my landlord comes then" -> {"kind":"start_task","task":"book","service":"plumber",\
+"date_expr":"before:weekday:thu"}
+"Never send anyone before 10 a.m." -> {"kind":"memory","memory_op":"remember","memory_key":"earliest_time",\
+"memory_value":"10:00"}
+"forget everything except my area" -> {"kind":"memory","memory_op":"forget","memory_keep":["home_area"]}
 "mujhe kal haircut ke liye yaad dilaen" -> {"kind":"unclear"}"""
 
 INTERPRETER_TOOL = ("emit_intent",

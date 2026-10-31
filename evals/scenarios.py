@@ -501,3 +501,89 @@ def s35(h: Harness) -> str:
     h.expect([a["status"] for a in h.approvals()] == ["declined"], "declined")
     h.expect(not h.calls("book"), "nothing booked")
     return "no booking"
+
+
+# =============================================================================== exclusions, two requests, memory, deadlines
+@scenario("S36", "Ruled-out providers are never offered; ruling one out withdraws its card", ["state", "approval"],
+          "excluded provider absent from options; card for a newly excluded provider voided; nothing booked")
+def s36(h: Harness) -> str:
+    h.say("Find a plumber in Indiranagar tomorrow, not Sharma Plumbing")
+    r = h.say("no preference")
+    names = [o["name"] for o in r.options]
+    h.expect(bool(names) and not any("sharma" in n.lower() for n in names), "Sharma left out of the options")
+    r = h.say("Option 1")
+    h.expect(r.approval is not None, "approval card shown")
+    first = (r.approval or {}).get("provider", "?")
+    h.say(f"actually, not {first.split()[0]}")
+    h.expect(any(a["status"] == "void" for a in h.approvals()), "card for the newly excluded provider voided")
+    h.expect(not h.calls("book"), "nothing booked")
+    excl = [x.lower() for x in (h.state().slot("exclude") or [])]
+    h.expect(any("sharma" in x for x in excl) and any(first.split()[0].lower() in x for x in excl),
+             "both exclusions kept")
+    return f"excluded {h.state().slot('exclude')}"
+
+
+@scenario("S37", "Two requests in one message: neither is dropped", ["state", "approval"],
+          "first request handled; second queued, offered when the first is done, and started on a yes")
+def s37(h: Harness) -> str:
+    h.say("Cancel my AC servicing and book an electrician in Indiranagar tomorrow")
+    h.expect(bool(h.state().deferred), "second request queued")
+    r = h.say("yes")
+    h.expect(bool(h.calls("cancel")), "cancellation carried out")
+    q = h.state().pending_question or {}
+    h.expect(q.get("kind") == "start_deferred", "second request offered once the first was done")
+    r = h.say("yes")
+    st = h.state()
+    h.expect(st.task == "book" and st.slot("service") == "electrician", "second request started")
+    h.expect(not h.calls("book"), "nothing booked without its own approval")
+    return f"cancelled, then {st.task} {st.slot('service')}"
+
+
+@scenario("S38", "Forget everything asks first and keeps what you name", ["memory"],
+          "nothing deleted before a clear yes; 'except my area' keeps the area; 'no' keeps everything")
+def s38(h: Harness) -> str:
+    h.say("Remember I live in Indiranagar")
+    h.say("Never send anyone before 10 a.m.")
+    active = lambda: {f["key"]: f["value"] for f in h.facts("active")}  # noqa: E731
+    before = active()
+    h.say("forget everything except my area")
+    h.expect(active() == before, "nothing forgotten before a yes")
+    h.expect((h.state().pending_question or {}).get("kind") == "confirm_forget", "asked first")
+    h.say("theek hai par pehle batao kya kya hai")
+    h.expect(active() == before, "a hedged reply forgets nothing")
+    h.say("yes")
+    after = active()
+    h.expect(after.get("home_area") == "Indiranagar" and "earliest_time" not in after,
+             "area kept, earliest time forgotten")
+    h.say("forget everything")
+    h.say("no")
+    h.expect(active().get("home_area") == "Indiranagar", "'no' keeps everything")
+    return f"kept {sorted(active())}"
+
+
+@scenario("S39", "Memory times in other formats are saved; unreadable ones are refused out loud", ["memory"],
+          "'after:10:00' saved as 10:00; an unreadable value is not saved and the refusal is traced",
+          model=lambda: ScriptedModel([
+              {"kind": "memory", "memory_op": "remember", "memory_key": "earliest_time", "memory_value": "after:10:00"},
+              {"kind": "memory", "memory_op": "remember", "memory_key": "earliest_time", "memory_value": "noonish"}],
+              fallback=RuleModel()))
+def s39(h: Harness) -> str:
+    h.say("Never send anyone before 10 a.m.")
+    get = lambda: {f["key"]: f["value"] for f in h.facts("active")}.get("earliest_time")  # noqa: E731
+    h.expect(get() == "10:00", "saved as 10:00")
+    h.say("never before noonish")
+    h.expect(get() == "10:00", "unreadable value not saved")
+    h.expect(any(e["type"] == "memory_rejected" for e in h.traces()), "refusal traced")
+    return f"earliest_time {get()}"
+
+
+@scenario("S40", "A deadline date only offers slots before it", ["state"],
+          "'before Thursday' resolves to today through Wednesday; every offer falls inside it")
+def s40(h: Harness) -> str:
+    from errand.timeparse import resolve_date
+    h.say("Find a plumber in Indiranagar before Thursday")
+    h.say("no preference")
+    start, end, _ = resolve_date("before:weekday:thu", h.clock.now())
+    days = sorted({o["slot_start"][:10] for o in h.state().offers})
+    h.expect(bool(days) and all(start <= d <= end for d in days), "every offer falls before Thursday")
+    return f"offers on {days} (window {start}..{end})"

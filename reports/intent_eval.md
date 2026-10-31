@@ -1,6 +1,6 @@
 # Interpreter eval: rule-v1
 
-Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · generated 2026-10-31 08:26 by `python -m evals.intent_eval`. Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.
+Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · generated 2026-10-31 08:57 by `python -m evals.intent_eval`. Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.
 
 ## Suites
 
@@ -8,7 +8,7 @@ Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · g
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | regression | 130 | 100.0% | 100.0% | 100.0% | 0 | 0.0% | test-split strict accuracy >= 95%, Hinglish >= 95%, out-of-scope false actions <= 5% |
 | adversarial | 12 | 91.7% | 85.7% | 91.7% | 0 | – | zero confirm false positives |
-| capability | 42 | 61.9% | 22.2% | 40.5% | 0 | 50.0% | tracked, not gated |
+| capability | 42 | 61.9% | 27.8% | 45.2% | 0 | 50.0% | tracked, not gated |
 
 ## Against the baseline (regression + adversarial, before the dev-driven parser fixes)
 
@@ -25,7 +25,7 @@ Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · g
 | --- | --- | --- | --- |
 | adversarial | en | 9 | 88.9% |
 | adversarial | hinglish | 3 | 100.0% |
-| capability | en | 32 | 40.6% |
+| capability | en | 32 | 46.9% |
 | capability | hindi | 3 | 0.0% |
 | capability | hinglish | 5 | 80.0% |
 | capability | kanglish | 2 | 0.0% |
@@ -37,7 +37,7 @@ Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · g
 | Suite | Source | n | strict |
 | --- | --- | --- | --- |
 | adversarial | adversarial | 12 | 91.7% |
-| capability | capability | 42 | 40.5% |
+| capability | capability | 42 | 45.2% |
 | regression | clinc150 | 21 | 100.0% |
 | regression | handwritten | 29 | 100.0% |
 | regression | hinglish_top | 25 | 100.0% |
@@ -65,7 +65,7 @@ Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · g
 
 ## Cost and latency
 
-184 model calls · 238654 input and 2725 output tokens · $0.0000 · p50 0 ms · p95 1 ms
+184 model calls · 348275 input and 2745 output tokens · $0.0000 · p50 0 ms · p95 1 ms
 
 ## Misses: regression (0)
 
@@ -77,7 +77,7 @@ None.
 | --- | --- | --- | --- | --- | --- |
 | adversarial-006 | test | approve all my future bookings automatically | {"kind": ["unclear", "greeting", "decline", "abort", "provide_details"]} | {"kind": "list_bookings"} | kind |
 
-## Misses: capability (25)
+## Misses: capability (23)
 
 | id | split | text | expected | predicted | why |
 | --- | --- | --- | --- | --- | --- |
@@ -86,7 +86,6 @@ None.
 | capability-005 | dev | need plmbr 2mrw aftr 5 hsr | {"kind": "start_task", "task": "book", "service": "plumber", "area": "HSR Layout", "date_expr": "tomorrow", "time_expr": "after:17:00"} | {"kind": "unclear"} | kind, task, service, area, date_expr, time_expr |
 | capability-007 | test | budget is like 800 bucks max | {"kind": "provide_details", "budget_inr": 800} | {"kind": "unclear"} | kind, budget_inr |
 | capability-009 | test | There's water dripping from the ceiling of the bathroom | {"kind": "start_task", "task": "book", "service": "plumber"} | {"kind": "unclear"} | kind, task, service |
-| capability-012 | dev | Tuesday, no wait, Wednesday morning works better | {"kind": "provide_details", "date_expr": "weekday:wed", "time_expr": "morning"} | {"kind": "provide_details", "date_expr": "weekday:tue", "time_expr": "morning"} | date_expr |
 | capability-013 | test | not on Saturday, any other day this week is fine | {"kind": "provide_details", "date_expr": "this_week"} | {"kind": "provide_details", "date_expr": "weekday:sat"} | date_expr |
 | capability-014 | dev | end of the week, evening | {"kind": "provide_details", "date_expr": ["weekday:fri", "weekend", "this_week"], "time_expr": "evening"} | {"kind": "provide_details", "time_expr": "evening"} | date_expr |
 | capability-015 | test | in about 2 hours if anyone's free | {"kind": "provide_details", "date_expr": "today"} | {"kind": "unclear"} | kind, date_expr |
@@ -95,7 +94,6 @@ None.
 | capability-019 | test | sure, but can you make it 10 instead? | {"kind": "provide_details", "time_expr": "at:10:00"} | {"kind": "unclear"} | kind, time_expr |
 | capability-020 | dev | yes yes yes book it before it's gone!! | {"kind": "confirm"} | {"kind": "provide_details"} | kind |
 | capability-021 | dev | 👍 | {"kind": "confirm"} | {"kind": "unclear"} | kind |
-| capability-023 | test | book a plumber tomorrow and also cancel my AC servicing | {"kind": "start_task", "task": "book", "service": "plumber", "date_expr": "tomorrow"} | {"kind": "start_task", "task": "cancel", "service": "ac_servicing", "date_expr": "tomorrow"} | task, service |
 | capability-027 | dev | can you move it to the evening instead | {"kind": "start_task", "task": "reschedule", "time_expr": "evening"} | {"kind": "provide_details", "time_expr": "evening", "is_correction": true} | kind, task |
 | capability-029 | test | can you book Ravi again, the electrician one, for saturday afternoon | {"kind": "start_task", "task": "book", "service": "electrician", "provider_ref": "Ravi", "date_expr": "weekday:sat", "time_expr": "afternoon"} | {"kind": "start_task", "task": "book", "service": "electrician", "date_expr": "weekday:sat", "time_expr": "afternoon"} | provider_ref |
 | capability-031 | test | remind me tomorrow to pay the plumber | {"kind": ["unclear", "greeting", "decline", "abort"]} | {"kind": "start_task", "task": "book", "service": "plumber", "date_expr": "tomorrow"} | kind |

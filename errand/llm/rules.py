@@ -51,7 +51,7 @@ def is_affirmation(text: str) -> bool:
 SERVICE_PATTERNS = [
     ("ac_servicing", r"\bac\b|\ba\.c\.|air ?con|air conditioner"),
     ("plumber", r"plumb|\btaps?\b|leak|pipe|drain|toilet|flush|geyser|\bsink\b|\bnal\b|tapak|tanki"),
-    ("electrician", r"electric|wiring|switch|socket|\bfans?\b|mcb|bijli|pankha"),
+    ("electrician", r"electric|wiring|switch|socket|\bfans?\b|mcb|bijli|pankh"),
     ("cleaning", r"clean|maid|safai|safaai|jhadu"),
     ("carpenter", r"carpent|furniture|wardrobe|hinge|\bwood|badhai|almari|darwaza"),
 ]
@@ -130,6 +130,11 @@ def _day_of_month(today: date, day: int, month: int | None = None) -> str | None
 
 def find_date(raw: str, today: date) -> str | None:
     t = _normalize(raw)
+    m = re.search(r"\bbefore " + WEEKDAY_RE, t) or re.search(WEEKDAY_RE + r" se pehle", t)
+    if m:  # a deadline: "before Thursday", "guruvar se pehle"
+        return f"before:weekday:{WEEKDAYS[m.group(1)]}"
+    if re.search(r"\bbefore (the )?day after tomorrow|parso se pehle", t):
+        return "before:day_after_tomorrow"
     has_weekday = re.search(WEEKDAY_RE, t)
     if re.search(r"day after tomorrow|\bparso\b|\bparson\b", t):
         return "day_after_tomorrow"
@@ -148,6 +153,9 @@ def find_date(raw: str, today: date) -> str | None:
     if m:
         return _day_of_month(today, int(m.group(2)), MONTHS[m.group(1)])
     if has_weekday:
+        days = list(re.finditer(WEEKDAY_RE, t))
+        if len(days) > 1 and re.search(r"\b(no|nahi|actually|balki|make it|instead)\b", t):
+            has_weekday = days[-1]  # "Tuesday, no Wednesday, actually Thursday": the last one stands
         word = has_weekday.group(1)
         wd = WEEKDAYS[word]
         if re.search(r"\bnext " + word + r"\b|\b" + word + r" (of )?next week\b|\bagle " + word, t):
@@ -201,7 +209,7 @@ def find_time(raw: str) -> str | None:
     t = re.sub(r"\b\d{3,}\b(?!\s*(am|pm|baje))", " ", t)
     t = re.sub(r"\b\d{1,2}(st|nd|rd|th)\b", " ", t)
     t = re.sub(r"day after tomorrow", " ", t)  # the "after" in it is not a time bound
-    m = re.search(r"(.{0,30}?)\s*se pehle (nahi|mat)\b", t)
+    m = re.search(r"(.{0,30}?)\s*se pehle (kabhi )?(nahi|mat|na)\b", t)
     if m and (clock := _parse_clock(m.group(1), t, bare_ok=True)):
         return f"after:{clock[0]:02d}:00"
     m = re.search(r"(not before|no earlier than|after|from|starting|earliest)\s+(.{1,30})", t)
@@ -228,7 +236,7 @@ def find_time(raw: str) -> str | None:
         return "afternoon"
     if re.search(r"\bevenings?\b|after work|\bsham\b|\bshaam\b|\braat\b|\btonight\b", t):
         return "evening"
-    if re.search(r"any ?time|whenever|kabhi bhi", t):
+    if re.search(r"any ?time|whenever|kabhi bhi|koi bhi (time|samay|waqt)", t):
         return "any"
     return None
 
@@ -236,7 +244,7 @@ def find_time(raw: str) -> str | None:
 def find_budget(raw: str) -> tuple[int | None, bool]:
     t = _normalize(raw)
     if re.search(r"no budget|any price|price doesn'?t matter|whatever it costs|any budget|budget doesn'?t matter|"
-                 r"koi budget nahi|budget nahi hai|koi limit nahi|price matter nahi", t):
+                 r"koi budget nahi|budget nahi\b|koi limit nahi|price matter nahi", t):
         return None, True
     m = re.search(r"(under|below|less than|max(?:imum)?|up ?to|within|budget(?: of| is)?|no more than|cheaper than|"
                   r"nothing (?:above|over|more than)|not (?:above|over|more than))\s*(?:₹|rs\.?|inr)?\s*([\d,]+)\s*(k)?\b",
@@ -268,6 +276,35 @@ def find_provider(t: str, ctx: dict) -> str | None:
                  r"\bthat (one|provider|plumber|electrician)\b|\b(unko|usko|unhe|use) (book|bulao|bhejo)", tl):
         return "that"
     return None
+
+
+NOT_NAMES = {"i", "ac", "hsr", "indiranagar", "koramangala", "whitefield", "layout", "the", "a", "my", "pls", "please"}
+
+
+def find_exclusions(t: str, ctx: dict) -> list[str]:
+    """Providers the user ruled out: "not Arctic Breeze", "anyone but BrightSpark", "Sharma wale mat bhejna"."""
+    names: list[str] = []
+    for m in re.finditer(r"\b(?:not|anyone but|anybody but|except|other than|apart from|don'?t send|no more)\s+"
+                         r"((?:[A-Z][\w&']*\s?){1,3})", t):
+        names.append(m.group(1))
+    for m in re.finditer(r"((?:[A-Z][\w&']*\s?){1,3})\s*(?:ko chhod ke|ko chod ke|ko chhodkar|ke alawa|"
+                         r"wal[ea] mat|mat bhejna|nahi chahiye)", t):
+        names.append(m.group(1))
+    tl = t.lower()
+    for name in ctx.get("provider_names", []):
+        first = name.lower().split()[0]
+        if re.search(rf"\b(not|but|except|other than|don'?t send)\s+(the\s+)?{re.escape(first)}\b|"
+                     rf"\b{re.escape(first)}\b\s*(wal[ea]\s+)?(mat|ko chhod|ke alawa)", tl):
+            names.append(name)
+    out = []
+    for n in names:
+        words = [w for w in n.strip().split() if w.lower() not in NOT_NAMES and not re.fullmatch(WEEKDAY_RE[2:-2], w.lower())
+                 and not re.match(MONTH_RE, w.lower()) and not find_service(w)]
+        if words:
+            name = " ".join(words)
+            if name.lower() not in {x.lower() for x in out}:
+                out.append(name)
+    return out[:5]
 
 
 def find_option(t: str, ctx: dict) -> int | None:
@@ -317,6 +354,17 @@ def memory_intent(t: str, ctx: dict) -> dict | None:
                  r"kya yaad hai|mere baare mein kya (pata|yaad)", tl):
         return {"kind": "memory", "memory_op": "view"}
     if re.search(r"\b(forget|bhool jao|bhul jao)\b", tl):
+        keep = []
+        if re.search(r"except (my |the )?(area|address|home)|bas (mera )?area|area (chhod|chod) ke|area ke alawa|"
+                     r"siwaay area|but (keep|remember) (my )?area", tl):
+            keep.append("home_area")
+        if re.search(r"except (my |the )?(time|earliest)|bas (time|samay)|time ke alawa", tl):
+            keep.append("earliest_time")
+        if keep or re.search(r"\b(everything|all|sab|sabkuch|sab kuch)\b", tl):
+            out = {"kind": "memory", "memory_op": "forget"}
+            if keep:
+                out["memory_keep"] = keep
+            return out
         obj = re.sub(r"\b(forget|bhool jao|bhul jao|about|my|the|mera|meri|mere)\b", " ", tl).strip(" .!")
         if obj in ("", "it", "that", "this"):
             return None
@@ -345,7 +393,7 @@ def memory_intent(t: str, ctx: dict) -> dict | None:
         if prov and prov not in ("that", "last_time"):
             return {"kind": "memory", "memory_op": op, "memory_key": "preferred_technician", "memory_value": prov}
     if re.search(r"never .{0,40}before|nothing before|from now on .{0,30}(after|before)|always after|"
-                 r"se pehle kabhi nahi|hamesha .{0,20}ke baad", tl):
+                 r"se pehle kabhi (nahi|mat|na)|se pehle mat bhej|hamesha .{0,20}ke baad", tl):
         when = find_time(t)
         if when and when.startswith(("after:", "before:")):
             return {"kind": "memory", "memory_op": "remember", "memory_key": "earliest_time",
@@ -360,7 +408,49 @@ RESCHEDULE_VERBS = (r"\b(move|reschedule|reshedule|reschdule|shift|postpone|prep
                     r"\bbadal do\b|\baage kar")
 
 
+TASK_WORDS = r"\b(cancel|book|get|find|move|reschedule|shift|bulao|bula do|bhej|chahiye|need)\b"
+
+
+def split_second_request(t: str) -> tuple[str, str] | None:
+    """'cancel my AC servicing and instead get an electrician' -> (first, second). A second request needs its
+    own service (different from the first) or its own task word plus a service or booking."""
+    for m in re.finditer(r"\s*,?\s*\b(?:and (?:also |then |instead )?|aur (?:phir )?|plus |also )", t, re.I):
+        head, tail = t[:m.start()].strip(" ,"), t[m.end():].strip(" ,")
+        if not head or not tail:
+            continue
+        hs, ts = find_service(_normalize(head)), find_service(_normalize(tail))
+        tail_task = re.search(TASK_WORDS, tail, re.I)
+        if ts and ts != hs and (tail_task or hs):
+            return head, re.sub(r"^(instead|phir)\s+", "", tail, flags=re.I)
+        if tail_task and re.search(r"\b(cancel|booking)\b", tail, re.I) and (hs or re.search(TASK_WORDS, head, re.I)):
+            return head, tail
+    return None
+
+
 def interpret(message: str, ctx: dict) -> dict:
+    t = message.strip()
+    if not t:
+        return {"kind": "unclear"}
+    split = split_second_request(t) if not ctx.get("awaiting_approval") else None
+    if split:
+        out = interpret(split[0], ctx)
+        if out.get("kind") in ("start_task", "provide_details"):
+            if out.get("task", "book") == "book":
+                full = interpret_one(t, ctx)
+                for k in ("date_expr", "time_expr", "area", "budget_inr"):  # "an electrician and a plumber tomorrow"
+                    if k not in out and k in full:
+                        out[k] = full[k]
+            out["also_requested"] = split[1][:120]
+            return out
+    out = interpret_one(t, ctx)
+    if out.get("kind") == "memory" and out.get("memory_op") in ("remember", "correct"):
+        m = re.search(r"\b(?:but|par|lekin)\b\s+(.{6,})$", t, re.I)
+        if m and re.search(r"\b(this one|this booking|ye wali|yeh wali|booking)\b", m.group(1), re.I):
+            out["also_requested"] = m.group(1)[:120]
+    return out
+
+
+def interpret_one(message: str, ctx: dict) -> dict:
     t = message.strip()
     if not t:
         return {"kind": "unclear"}
@@ -385,6 +475,11 @@ def interpret(message: str, ctx: dict) -> dict:
     details: dict = {}
     if (s := find_service(tl)):
         details["service"] = s
+    obj = re.search(r"\bbut for (?:the |my |our )?(\w+)|\b(\w+) ke liye\b", tl)
+    if obj and (svc := find_service(obj.group(1) or obj.group(2))):
+        details["service"] = svc  # "the AC guy, but for the fan": what's broken decides the service
+    if (ex := find_exclusions(t, ctx)):
+        details["exclude_providers"] = ex
     if (a := find_area(tl)):
         details["area"] = a
     if (d := find_date(t, today)):
@@ -396,7 +491,8 @@ def interpret(message: str, ctx: dict) -> dict:
         details["budget_inr"] = budget
     if no_budget:
         details["no_budget"] = True
-    if (p := find_provider(t, ctx)):
+    if (p := find_provider(t, ctx)) and not (details.get("exclude_providers")
+                                            and any(p.lower().startswith(x.lower().split()[0]) for x in details["exclude_providers"])):
         details["provider_ref"] = p
     if (b := re.search(r"\bB-\d{3,6}\b", t, re.I)):
         details["booking_ref"] = b.group(0).upper()

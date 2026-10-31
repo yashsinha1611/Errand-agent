@@ -10,7 +10,7 @@ library: nothing to install.
 ## Run it (three commands)
 
 ```bash
-make test     # unit tests, golden-set integrity, fuzz, intent eval, 35 scenarios -> reports/
+make test     # unit tests, golden-set integrity, fuzz, intent eval, 40 scenarios -> reports/
 make demo     # web console with streaming chat and live trace: http://127.0.0.1:8765
 make chat     # the same agent in the terminal
 ```
@@ -33,7 +33,7 @@ To test every feature and guardrail with Claude (`make check-llm`, `make live-sc
 | 5. Bounded execution | `budget.Budget` (model, tool, step, wall clock, cost); one boundary handler; replies from the outbox truth | S24, S25, S26, S27; invariant I8, I9 |
 | 6. Memory | `memory.MemoryStore`: stated vs inferred, confirm, view, correct, forget with tombstones | S18, S19, S20, S33; `MemoryTest`; invariants I5, I6 |
 | 7. Traces | `tracing.Tracer`: one JSONL per run, allowlist redaction, OTel `gen_ai.*` names, tokens and cost | `TracingTest`; invariant I10; `docs/traces/` |
-| 8. Evals | `evals/`: 35 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz | `make test` |
+| 8. Evals | `evals/`: 40 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz | `make test` |
 
 ## Deliverables
 

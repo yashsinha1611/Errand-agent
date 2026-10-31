@@ -17,6 +17,12 @@ FIRST_HOUR, LAST_START_HOUR = 8, 18          # slots start 08:00 … 18:00, one 
 def resolve_date(expr: str, now: datetime) -> tuple[str, str, str]:
     """Return (start_date, end_date, label) as ISO dates, inclusive."""
     today = now.date()
+    if expr.startswith("before:"):
+        # A deadline ("before Thursday", "Diwali se pehle"): any day from today until the day before it.
+        target = date.fromisoformat(resolve_date(expr.split(":", 1)[1], now)[0])
+        end = max(today, target - timedelta(days=1))
+        t = datetime(target.year, target.month, target.day)
+        return today.isoformat(), end.isoformat(), f"before {fmt_day(t)}"
     if expr == "today":
         start = end = today
     elif expr == "tomorrow":
