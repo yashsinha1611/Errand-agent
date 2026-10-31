@@ -10,7 +10,7 @@ library: nothing to install.
 ## Run it (three commands)
 
 ```bash
-make test     # unit tests, golden-set integrity, fuzz, intent eval, 40 scenarios -> reports/
+make test     # unit tests, golden-set integrity, fuzz, intent eval, 42 scenarios -> reports/
 make demo     # web console with streaming chat and live trace: http://127.0.0.1:8765
 make chat     # the same agent in the terminal
 ```
@@ -26,14 +26,14 @@ To test every feature and guardrail with Claude (`make check-llm`, `make live-sc
 
 | Must-have | Enforced in | Proven by |
 | --- | --- | --- |
-| 1. Explicit workflow state | `domain.ErrandState`, `policy.missing_fields`, `policy.apply_details`, `policy.invalidations` | S02, S03, S21, S30; `PolicyTest` |
+| 1. Explicit workflow state | `domain.ErrandState`, `policy.missing_fields`, `policy.apply_details`, `policy.invalidations`; an edit after a finished booking asks move-or-another | S02, S03, S21, S30, S41; `PolicyTest` |
 | 2. Approval enforced by code | `approval.ApprovalGate`: fingerprinted row, `UserTurnRef` to grant, compare-and-set consume in the outbox transaction | S01, S06, S07, S08, S09, S28, S29, S31, S32; `ApprovalTest`; invariants I1, I3, I7 |
 | 3. Booking correctness | `agent._run_book`, `_verify_book`, `_recover`; derived idempotency keys; mock honours keys | S10, S11, S12, S15, S16, S17, S22, S23; invariant I2, I4 |
-| 4. Untrusted tool output | `domain.UntrustedText`, `Interpreter` refuses it, `quarantine.py` enum-only summary, writes need `UserTurnRef` | S04, S05, S06, S31; `InterpreterTest` |
+| 4. Untrusted tool output | `domain.UntrustedText`, `Interpreter` refuses it, `quarantine.py` enum-only summary, writes need `UserTurnRef`; provider names reach the model only through `util.model_label` | S04, S05, S06, S31, S42; `InterpreterTest`, `ProviderNameTest` |
 | 5. Bounded execution | `budget.Budget` (model, tool, step, wall clock, cost); one boundary handler; replies from the outbox truth | S24, S25, S26, S27; invariant I8, I9 |
 | 6. Memory | `memory.MemoryStore`: stated vs inferred, confirm, view, correct, forget with tombstones | S18, S19, S20, S33; `MemoryTest`; invariants I5, I6 |
 | 7. Traces | `tracing.Tracer`: one JSONL per run, allowlist redaction, OTel `gen_ai.*` names, tokens and cost | `TracingTest`; invariant I10; `docs/traces/` |
-| 8. Evals | `evals/`: 40 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz | `make test` |
+| 8. Evals | `evals/`: 42 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz. The same scenarios replay offline from recorded Claude outputs | `make test`, `make evals-recorded` |
 
 ## Deliverables
 
@@ -45,6 +45,15 @@ To test every feature and guardrail with Claude (`make check-llm`, `make live-sc
 | Three real bugs with fixes and regression tests | [`docs/BUGS.md`](docs/BUGS.md) |
 | End-to-end trace with timeout-after-success | [`docs/traces/timeout_after_success.jsonl`](docs/traces/timeout_after_success.jsonl); annotated in the design note |
 | Demo recording plan | [`docs/DEMO.md`](docs/DEMO.md) |
+
+### Scenarios on a recorded model
+
+The brief asks for evals against "a scripted or recorded model". `make test` runs every scenario against the
+deterministic offline interpreter plus scripted models that misbehave on purpose. `make evals-recorded` runs the
+same 42 scenarios against **Claude's real outputs**, recorded once (`make record-scenarios`, a few cents) and
+committed under `evals/data/recordings/scenarios/`. Replay never touches the network, and it is strict: a prompt
+missing from the recording (because the prompt or a scenario changed) marks that scenario STALE instead of
+letting another model answer. `RecordedReplayTest` checks record, offline replay and stale detection.
 
 ## Is the model understanding people? (golden set and interpreter eval)
 

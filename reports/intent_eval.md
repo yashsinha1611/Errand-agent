@@ -1,6 +1,6 @@
 # Interpreter eval: rule-v1
 
-Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · generated 2026-10-31 08:57 by `python -m evals.intent_eval`. Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.
+Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · generated 2026-10-31 12:03 by `python -m evals.intent_eval`. Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.
 
 ## Suites
 
@@ -65,7 +65,7 @@ Golden set **v1** (frozen 2026-10-31, checksums verified) · 184 utterances · g
 
 ## Cost and latency
 
-184 model calls · 348275 input and 2745 output tokens · $0.0000 · p50 0 ms · p95 1 ms
+184 model calls · 361838 input and 2745 output tokens · $0.0000 · p50 0 ms · p95 1 ms
 
 ## Misses: regression (0)
 

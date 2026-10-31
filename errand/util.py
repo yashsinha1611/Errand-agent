@@ -82,5 +82,21 @@ def sanitize_label(text: str, limit: int = 48) -> str:
     return cleaned[:limit]
 
 
+_NAME_SHAPE = re.compile(r"^[^\W_][\w\u0900-\u097F &'.,()-]{0,39}$")
+_NAME_INSTRUCTION = re.compile(
+    r"\b(system|assistant|user|ignore|instructions?|approved?|confirm(ed)?|proceed|override|prompt|admin|developer|"
+    r"book (it|now)|pay|cancel all|policy)\b|https?|www\.", re.I)
+
+
+def model_label(name: str) -> str:
+    """A provider name as the interpreter may see it. Names come from the provider's system, so they are data:
+    anything that isn't plainly a business name (odd characters, instruction words, links) is replaced by a
+    neutral stable label. People still see the real name, escaped, in the chat and on the approval card."""
+    n = sanitize_label(name, 60)
+    if _NAME_SHAPE.match(n) and not _NAME_INSTRUCTION.search(n):
+        return n
+    return f"Provider {sha256(n)[:4]}"
+
+
 def truncate(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"

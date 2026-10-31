@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 import threading
 from collections import defaultdict
 from contextlib import contextmanager
@@ -26,12 +27,13 @@ from .llm.anthropic import AnthropicModel
 from .llm.base import Model
 from .llm.rules import RuleModel, is_affirmation
 from .memory import MemoryStore, label_for
+from .timeparse import resolve_date, resolve_time
 from .mock.provider import MockProvider
 from .provider_client import ProviderClient, Result
 from .storage import AgentDB
 from .timeparse import resolve_time
 from .tracing import Tracer, scrub
-from .util import IdFactory, fmt_day, fmt_inr, fmt_short_slot, fmt_slot, parse_iso, sanitize_label, sha256
+from .util import IdFactory, fmt_day, fmt_inr, fmt_short_slot, fmt_slot, model_label, parse_iso, sanitize_label, sha256
 
 
 class InjectedCrash(BaseException):
@@ -202,6 +204,8 @@ class AgentService:
                 else:
                     st.done(_intent_label(intent), detail=detail)
         s.unclear_streak = s.unclear_streak + 1 if intent.kind == "unclear" else 0
+        if (s.pending_question or {}).get("kind") == "after_booking" and self._answer_after_booking(ctx, intent, inp):
+            return
         handler = getattr(self, f"_on_{intent.kind}")
         handler(ctx, intent, inp, via_button)
         if intent.also_requested and not via_button:
@@ -240,8 +244,11 @@ class AgentService:
             options = [{"index": i, "name": o["name"], "slot": fmt_short_slot(o["slot_start"]), "price": o["price"],
                         "hour": parse_iso(o["slot_start"]).hour}
                        for i, o in enumerate(s.offers[: self.settings.max_options_shown], 1)]
+        # Provider names come from the provider's system: the model only ever sees neutralised labels.
+        for o in options:
+            o["name"] = model_label(o["name"])
         names: list[str] = []
-        for n in [o["name"] for o in options] + [p["name"] for p in s.known_providers]:
+        for n in [o["name"] for o in options] + [model_label(p["name"]) for p in s.known_providers]:
             if n and n not in names:
                 names.append(n)
         now = self.clock.now()
@@ -250,10 +257,12 @@ class AgentService:
             if k == "provider":
                 continue
             known[k] = v.get("label") or v.get("value")
+            if k == "provider" and isinstance(known[k], str):
+                known[k] = model_label(known[k])
         return {
             "today": now.date().isoformat(), "now": now.strftime("%H:%M"), "phase": s.phase, "task": s.task,
             "known": known, "awaiting_approval": pending is not None,
-            "approval": {"action": pending.action, "provider": pending.provider_name,
+            "approval": {"action": pending.action, "provider": model_label(pending.provider_name),
                          "when": fmt_slot(pending.slot_start), "price": pending.price} if pending else None,
             "pending_question": (s.pending_question or {}).get("kind"),
             "options": options, "provider_names": names[:24],
@@ -496,11 +505,17 @@ class AgentService:
             s.set_slot("booking_ref", intent.booking_ref, "user", s.turn)
         self._advance(ctx)
 
-    def _on_provide_details(self, ctx, intent, inp, via_button) -> None:
+    def _on_provide_details(self, ctx, intent, inp, via_button, after_booking_ok: bool = False) -> None:
         s = ctx.state
         if s.pending_question and s.pending_question.get("kind") in ("confirm_provider", "confirm_fact") \
                 and not intent.has_details():
             ctx.say(self._current_question(ctx))
+            return
+        if not after_booking_ok and s.phase == "done" and s.task == "book" and s.result_booking_id \
+                and intent.has_details() and intent.service in (None, s.slot("service")):
+            # The errand is already booked: "make it Wednesday" could mean move it or book another one. Ask; never
+            # silently start a second booking while saying "changed".
+            self._ask_after_booking(ctx, intent)
             return
         if s.task is None:
             s.task = "book"
@@ -524,12 +539,76 @@ class AgentService:
             if budget is not None and s.selection["price"] > budget:
                 self._void_pending(ctx, "the new budget is below this price")
                 s.selection, s.hold = None, None
-        if corrected:
+        if corrected and not after_booking_ok:
             ctx.say(f"Changed the {narrate.join(sorted(_LABEL.get(c, c) for c in corrected))}. "
                     "Everything else stays the same.")
         if s.phase in ("awaiting_approval", "choosing", "done") and changed:
             self._set_phase(ctx, "collecting")
         self._advance(ctx)
+
+    # ------------------------------------------------------------------ edits after a finished booking
+    _MOVE = re.compile(r"\b(move|moving|reschedul\w*|shift|change (it|that|the booking)|that one|the same one|"
+                       r"existing|badal\w*|khisak\w*|wahi)\b", re.I)
+    _ANOTHER = re.compile(r"\b(another|new one|a new|second|one more|separate|extra|also book|dusra|naya|ek aur)\b",
+                          re.I)
+
+    def _ask_after_booking(self, ctx, intent: Intent) -> None:
+        s = ctx.state
+        bid = s.result_booking_id
+        sel = s.selection or {}
+        what = narrate.service_label(s.slot("service") or "")
+        booked = f"{bid} ({sel['name']}, {fmt_short_slot(sel['slot_start'])})" if sel.get("slot_start") else bid
+        wish = []
+        now = self.clock.now()
+        if intent.date_expr:
+            wish.append(resolve_date(intent.date_expr, now)[2])
+        if intent.time_expr:
+            wish.append(resolve_time(intent.time_expr)[2])
+        to = f" to {', '.join(wish)}" if wish else ""
+        s.pending_question = {"kind": "after_booking", "booking_id": bid, "service": s.slot("service"),
+                              "edit": intent.to_dict()}
+        ctx.trace.emit("state_transition", **{"from": s.phase, "to": s.phase, "diff": {"pending_question": "after_booking"}})
+        ctx.say(f"{booked} is already booked, and I haven’t changed it. Should I move it{to}, or book another "
+                f"{what}?")
+        ctx.chips = [f"Move {bid}", f"Book another {what}"]
+
+    def _answer_after_booking(self, ctx, intent: Intent, inp) -> bool:
+        """Deterministic: the user's own words (or a chip) decide; anything else drops the question."""
+        s = ctx.state
+        q = s.pending_question
+        text = (inp.text or "").strip()
+        move = bool(self._MOVE.search(text)) or (intent.kind == "start_task" and intent.task == "reschedule")
+        another = bool(self._ANOTHER.search(text)) or (intent.kind == "start_task" and intent.task == "book"
+                                                       and intent.service in (None, q["service"]))
+        if move == another:
+            if intent.kind in ("confirm", "unclear"):
+                ctx.say(f"Just to be sure: move {q['booking_id']}, or book another "
+                        f"{narrate.service_label(q['service'] or '')}?")
+                ctx.chips = [f"Move {q['booking_id']}", f"Book another {narrate.service_label(q['service'] or '')}"]
+                return True
+            if intent.kind == "decline":
+                s.pending_question = None
+                ctx.say(f"OK, {q['booking_id']} stays as it is. Nothing was changed.")
+                return True
+            s.pending_question = None  # the user moved on: handle the new message normally
+            return False
+        edit = Intent(**{k: v for k, v in q["edit"].items() if k != "kind"}, kind="provide_details")
+        s.pending_question = None
+        if move:
+            with ctx.step(f"Moving {q['booking_id']}") as st:
+                st.done("Reschedule", detail={"booking": q["booking_id"]})
+            s.clear_task()
+            s.task = "reschedule"
+            self._set_phase(ctx, "collecting")
+            if q.get("service"):
+                s.set_slot("service", q["service"], "user", s.turn)
+            s.set_slot("booking_ref", q["booking_id"], "user", s.turn)
+            self._apply_details(ctx, Intent(kind="provide_details", date_expr=edit.date_expr, time_expr=edit.time_expr))
+            self._advance(ctx)
+        else:
+            ctx.say(f"OK, a new {narrate.service_label(q['service'] or '')} booking; {q['booking_id']} stays as it is.")
+            self._on_provide_details(ctx, edit, inp, False, after_booking_ok=True)
+        return True
 
     def _apply_details(self, ctx, intent: Intent) -> tuple[set[str], set[str]]:
         s = ctx.state
@@ -1498,6 +1577,8 @@ class AgentService:
             return "Which booking do you mean? Pick one of the options."
         if q.get("kind") == "confirm_forget":
             return "Reply yes to forget them, or no to keep everything."
+        if q.get("kind") == "after_booking":
+            return f"Should I move {q['booking_id']}, or book another one?"
         if q.get("kind") == "start_deferred":
             return f"You also asked: {q.get('text')}. Shall I start on that now?"
         if s.task == "book" and s.phase == "collecting":

@@ -1,9 +1,15 @@
 PY ?= python3
 
-.PHONY: test demo chat evals clean intent-eval golden-verify review-sheet agreement check-llm live-scenarios hard-probes
+.PHONY: test demo chat evals clean intent-eval golden-verify review-sheet agreement check-llm live-scenarios hard-probes record-scenarios evals-recorded
 
-test:            ## unit tests, negative controls, fuzz, intent eval and 35 scenarios -> reports/
+test:            ## unit tests, negative controls, fuzz, intent eval and 42 scenarios -> reports/
 	$(PY) -m unittest discover -s tests -t . && $(PY) -m evals.intent_eval && $(PY) -m evals.run
+
+record-scenarios: ## record Claude's outputs for every scenario once (needs ANTHROPIC_API_KEY); commit the folder
+	$(PY) -m evals.recorded --record $(if $(MODEL),--model $(MODEL),)
+
+evals-recorded:  ## replay all scenarios offline from the recording: Claude's real outputs, no key, no network
+	$(PY) -m evals.recorded $(if $(MODEL),--model $(MODEL),)
 
 intent-eval:     ## interpreter accuracy on golden v1 (add MODEL=claude RECORD=1 for live Claude)
 	$(PY) -m evals.intent_eval --model $(or $(MODEL),rule) $(if $(RECORD),--record,)
@@ -32,7 +38,7 @@ agreement:       ## agreement and Cohen's kappa from a filled review sheet
 check-llm:       ## preflight: three probes against the live model (needs ANTHROPIC_API_KEY)
 	$(PY) -m errand check-llm
 
-live-scenarios:  ## all 40 scenarios with Claude reading every message, TRIALS times each (default 3)
+live-scenarios:  ## all 42 scenarios with Claude reading every message, TRIALS times each (default 3)
 	$(PY) -m evals.live --trials $(or $(TRIALS),3) $(if $(ONLY),--only $(ONLY),)
 
 hard-probes:     ## 79 hard English and Hinglish probes against Claude (MODEL=rule for the offline baseline)

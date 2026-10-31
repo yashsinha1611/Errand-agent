@@ -71,6 +71,17 @@ Run `make check-llm` first (three probes, no fallback, clear error hints). Then 
 [`docs/TESTING.md`](TESTING.md): automated checks (`make intent-eval MODEL=claude RECORD=1`,
 `make live-scenarios`) and a hands-on script covering every feature, guardrail and injection.
 
+To make the scenarios replayable offline against Claude's real outputs (what the brief means by a "recorded
+model"), record once and commit the folder:
+
+```
+make record-scenarios          # one live pass, a few cents; writes evals/data/recordings/scenarios/<model>/
+make evals-recorded            # from then on: offline, no key, same result every time
+git add evals/data/recordings && git commit -m "Record scenarios on Claude"
+```
+
+If you change the prompt later, replay marks the affected scenarios STALE; record again.
+
 ## 6. Measure Claude on the golden set
 
 ```
