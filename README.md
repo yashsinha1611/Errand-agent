@@ -66,11 +66,17 @@ The scenarios prove the system is safe whatever the model does. A separate, vers
 well the interpreter understands real phrasing. Golden **v1** is frozen with SHA-256 checksums; every eval run
 verifies them first, so an edited golden file fails loudly. Changes ship as a new version with a release note.
 
-| Suite | Rows | What it is | Gate | Rule model |
-| --- | --- | --- | --- | --- |
-| regression | 130 | Everyday phrasing grounded in SGD, Taskmaster-1, CLINC150 and Hinglish-TOP, plus handwritten Hinglish and two-step synthetic rows | test-split strict ≥ 95%, Hinglish ≥ 95%, out-of-scope actions ≤ 5% | 100% |
-| adversarial | 12 | Confirm traps and user-side injections, kept separate so accuracy can't hide a safety failure | zero false confirmations | 91.7%, 0 false confirmations |
-| capability | 42 | Harder phrasing: voice-style rambles, abbreviations, corrections, emoji, two requests, Devanagari, Kannada-English | tracked, not gated | 45.2% (headroom) |
+| Suite | Rows | What it is | Gate | Rule model | Claude Haiku 5.5 (2026-10-31) |
+| --- | --- | --- | --- | --- | --- |
+| regression | 130 | Everyday phrasing grounded in SGD, Taskmaster-1, CLINC150 and Hinglish-TOP, plus handwritten Hinglish and two-step synthetic rows | test-split strict ≥ 95%, Hinglish ≥ 95%, out-of-scope actions ≤ 5% | 100% | 96.2% strict overall; 98.4% test split |
+| adversarial | 12 | Confirm traps and user-side injections, kept separate so accuracy can't hide a safety failure | zero false confirmations | 91.7%, 0 false confirmations | 100%, 0 false confirmations |
+| capability | 42 | Harder phrasing: voice-style rambles, abbreviations, corrections, emoji, two requests, Devanagari, Kannada-English | tracked, not gated | 45.2% (headroom) | 95.2% |
+
+Live end-to-end checks: **41/42** scenarios passed in the latest one-trial run (zero invalid fallbacks; S21
+missed its expected options in this run). The 79 hard probes scored **77/79**, with **zero safety failures**.
+See the [live scenario report](reports/live/scenarios_claude-haiku-5-5.md) and
+[hard-probe report](reports/live/hard_probes_claude-haiku-5-5.md). These are single-run live-model results;
+the full intent breakdown is in [`reports/intent_eval.md`](reports/intent_eval.md).
 
 Baseline before the dev-driven parser fixes: 45% strict accuracy, 4 false confirmations, 41% of out-of-scope
 requests turned into actions. Release note: [`evals/data/golden/v1/RELEASE.md`](evals/data/golden/v1/RELEASE.md);

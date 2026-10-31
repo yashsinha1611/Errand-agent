@@ -1,13 +1,13 @@
 {
- "model": "rule-v1",
+ "model": "recorded:claude-haiku-5-5",
  "golden": "v1",
  "summary": {
   "suites": {
    "adversarial": {
     "all": {
      "n": 12,
-     "kind_acc": 0.917,
-     "strict_acc": 0.917,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
      "confirm_recall": 1.0,
@@ -26,8 +26,8 @@
     },
     "test": {
      "n": 7,
-     "kind_acc": 0.857,
-     "strict_acc": 0.857,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
      "confirm_recall": 1.0,
@@ -37,8 +37,8 @@
     "by_lang": {
      "en": {
       "n": 9,
-      "kind_acc": 0.889,
-      "strict_acc": 0.889,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": 1.0,
@@ -59,8 +59,8 @@
     "by_source": {
      "adversarial": {
       "n": 12,
-      "kind_acc": 0.917,
-      "strict_acc": 0.917,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": 1.0,
@@ -72,145 +72,145 @@
    "capability": {
     "all": {
      "n": 42,
-     "kind_acc": 0.619,
-     "strict_acc": 0.452,
+     "kind_acc": 1.0,
+     "strict_acc": 0.952,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
-     "confirm_recall": 0.2,
-     "oos_false_action_rate": 0.5,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": 0.0,
      "fields": {
-      "area": 0.667,
-      "budget_inr": 0.0,
-      "date_expr": 0.632,
+      "area": 1.0,
+      "budget_inr": 1.0,
+      "date_expr": 1.0,
       "no_budget": 1.0,
-      "provider_ref": 0.667,
-      "service": 0.833,
-      "task": 0.8,
-      "time_expr": 0.429
+      "provider_ref": 1.0,
+      "service": 1.0,
+      "task": 1.0,
+      "time_expr": 0.929
      }
     },
     "dev": {
      "n": 24,
-     "kind_acc": 0.667,
-     "strict_acc": 0.583,
+     "kind_acc": 1.0,
+     "strict_acc": 0.917,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
-     "confirm_recall": 0.25,
+     "confirm_recall": 1.0,
      "oos_false_action_rate": 0.0,
      "fields": {
-      "area": 0.5,
-      "date_expr": 0.727,
+      "area": 1.0,
+      "date_expr": 1.0,
       "provider_ref": 1.0,
-      "service": 0.889,
-      "task": 0.818,
-      "time_expr": 0.625
+      "service": 1.0,
+      "task": 1.0,
+      "time_expr": 0.875
      }
     },
     "test": {
      "n": 18,
-     "kind_acc": 0.556,
-     "strict_acc": 0.278,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
-     "confirm_recall": 0.0,
-     "oos_false_action_rate": 1.0,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": 0.0,
      "fields": {
       "area": 1.0,
-      "budget_inr": 0.0,
-      "date_expr": 0.5,
+      "budget_inr": 1.0,
+      "date_expr": 1.0,
       "no_budget": 1.0,
-      "provider_ref": 0.5,
-      "service": 0.778,
-      "task": 0.778,
-      "time_expr": 0.167
+      "provider_ref": 1.0,
+      "service": 1.0,
+      "task": 1.0,
+      "time_expr": 1.0
      }
     },
     "by_lang": {
      "en": {
       "n": 32,
-      "kind_acc": 0.625,
-      "strict_acc": 0.469,
+      "kind_acc": 1.0,
+      "strict_acc": 0.938,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
-      "confirm_recall": 0.333,
-      "oos_false_action_rate": 0.667,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": 0.0,
       "fields": {
-       "area": 0.5,
-       "budget_inr": 0.0,
-       "date_expr": 0.643,
+       "area": 1.0,
+       "budget_inr": 1.0,
+       "date_expr": 1.0,
        "no_budget": 1.0,
-       "provider_ref": 0.667,
-       "service": 0.846,
-       "task": 0.8,
-       "time_expr": 0.444
+       "provider_ref": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 0.889
       }
      },
      "hindi": {
       "n": 3,
-      "kind_acc": 0.0,
-      "strict_acc": 0.0,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
-      "confirm_recall": 0.0,
+      "confirm_recall": 1.0,
       "oos_false_action_rate": 0.0,
       "fields": {
-       "date_expr": 0.0,
-       "service": 0.0,
-       "task": 0.0,
-       "time_expr": 0.0
+       "date_expr": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
       }
      },
      "hinglish": {
       "n": 5,
       "kind_acc": 1.0,
-      "strict_acc": 0.8,
+      "strict_acc": 1.0,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": null,
       "oos_false_action_rate": null,
       "fields": {
-       "budget_inr": 0.0,
+       "budget_inr": 1.0,
        "date_expr": 1.0,
        "service": 1.0,
        "task": 1.0,
-       "time_expr": 0.667
+       "time_expr": 1.0
       }
      },
      "kanglish": {
       "n": 2,
-      "kind_acc": 0.5,
-      "strict_acc": 0.0,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
-      "confirm_recall": 0.0,
+      "confirm_recall": 1.0,
       "oos_false_action_rate": null,
       "fields": {
        "area": 1.0,
-       "date_expr": 0.0,
+       "date_expr": 1.0,
        "service": 1.0,
        "task": 1.0,
-       "time_expr": 0.0
+       "time_expr": 1.0
       }
      }
     },
     "by_source": {
      "capability": {
       "n": 42,
-      "kind_acc": 0.619,
-      "strict_acc": 0.452,
+      "kind_acc": 1.0,
+      "strict_acc": 0.952,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
-      "confirm_recall": 0.2,
-      "oos_false_action_rate": 0.5,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": 0.0,
       "fields": {
-       "area": 0.667,
-       "budget_inr": 0.0,
-       "date_expr": 0.632,
+       "area": 1.0,
+       "budget_inr": 1.0,
+       "date_expr": 1.0,
        "no_budget": 1.0,
-       "provider_ref": 0.667,
-       "service": 0.833,
-       "task": 0.8,
-       "time_expr": 0.429
+       "provider_ref": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 0.929
       }
      }
     }
@@ -218,47 +218,47 @@
    "regression": {
     "all": {
      "n": 130,
-     "kind_acc": 1.0,
-     "strict_acc": 1.0,
+     "kind_acc": 0.992,
+     "strict_acc": 0.962,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
-     "confirm_recall": 1.0,
+     "confirm_recall": 0.889,
      "oos_false_action_rate": 0.0,
      "fields": {
       "area": 1.0,
       "booking_ref": 1.0,
       "budget_inr": 1.0,
-      "date_expr": 1.0,
+      "date_expr": 0.957,
       "memory_key": 1.0,
       "memory_op": 1.0,
       "memory_value": 1.0,
       "no_budget": 1.0,
       "option_index": 1.0,
       "provider_ref": 1.0,
-      "service": 1.0,
+      "service": 0.971,
       "task": 1.0,
       "time_expr": 1.0
      }
     },
     "dev": {
      "n": 69,
-     "kind_acc": 1.0,
-     "strict_acc": 1.0,
+     "kind_acc": 0.986,
+     "strict_acc": 0.942,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
-     "confirm_recall": 1.0,
+     "confirm_recall": 0.857,
      "oos_false_action_rate": 0.0,
      "fields": {
       "area": 1.0,
       "budget_inr": 1.0,
-      "date_expr": 1.0,
+      "date_expr": 0.962,
       "memory_key": 1.0,
       "memory_op": 1.0,
       "memory_value": 1.0,
       "no_budget": 1.0,
       "option_index": 1.0,
       "provider_ref": 1.0,
-      "service": 1.0,
+      "service": 0.947,
       "task": 1.0,
       "time_expr": 1.0
      }
@@ -266,7 +266,7 @@
     "test": {
      "n": 61,
      "kind_acc": 1.0,
-     "strict_acc": 1.0,
+     "strict_acc": 0.984,
      "confirm_fp_rate": 0.0,
      "confirm_fp_count": 0,
      "confirm_recall": 1.0,
@@ -275,7 +275,7 @@
       "area": 1.0,
       "booking_ref": 1.0,
       "budget_inr": 1.0,
-      "date_expr": 1.0,
+      "date_expr": 0.952,
       "memory_op": 1.0,
       "option_index": 1.0,
       "provider_ref": 1.0,
@@ -288,7 +288,7 @@
      "en": {
       "n": 76,
       "kind_acc": 1.0,
-      "strict_acc": 1.0,
+      "strict_acc": 0.947,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": 1.0,
@@ -297,24 +297,24 @@
        "area": 1.0,
        "booking_ref": 1.0,
        "budget_inr": 1.0,
-       "date_expr": 1.0,
+       "date_expr": 0.923,
        "memory_key": 1.0,
        "memory_op": 1.0,
        "memory_value": 1.0,
        "option_index": 1.0,
        "provider_ref": 1.0,
-       "service": 1.0,
+       "service": 0.933,
        "task": 1.0,
        "time_expr": 1.0
       }
      },
      "hinglish": {
       "n": 54,
-      "kind_acc": 1.0,
-      "strict_acc": 1.0,
+      "kind_acc": 0.981,
+      "strict_acc": 0.981,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
-      "confirm_recall": 1.0,
+      "confirm_recall": 0.833,
       "oos_false_action_rate": 0.0,
       "fields": {
        "area": 1.0,
@@ -345,11 +345,11 @@
      },
      "handwritten": {
       "n": 29,
-      "kind_acc": 1.0,
-      "strict_acc": 1.0,
+      "kind_acc": 0.966,
+      "strict_acc": 0.966,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
-      "confirm_recall": 1.0,
+      "confirm_recall": 0.833,
       "oos_false_action_rate": 0.0,
       "fields": {
        "area": 1.0,
@@ -385,14 +385,14 @@
      "sgd": {
       "n": 28,
       "kind_acc": 1.0,
-      "strict_acc": 1.0,
+      "strict_acc": 0.964,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": 1.0,
       "oos_false_action_rate": 0.0,
       "fields": {
        "area": 1.0,
-       "date_expr": 1.0,
+       "date_expr": 0.929,
        "service": 1.0,
        "task": 1.0,
        "time_expr": 1.0
@@ -401,7 +401,7 @@
      "synthetic": {
       "n": 19,
       "kind_acc": 1.0,
-      "strict_acc": 1.0,
+      "strict_acc": 0.895,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": null,
@@ -410,13 +410,13 @@
        "area": 1.0,
        "booking_ref": 1.0,
        "budget_inr": 1.0,
-       "date_expr": 1.0,
+       "date_expr": 0.833,
        "memory_key": 1.0,
        "memory_op": 1.0,
        "memory_value": 1.0,
        "option_index": 1.0,
        "provider_ref": 1.0,
-       "service": 1.0,
+       "service": 0.889,
        "task": 1.0,
        "time_expr": 1.0
       }
@@ -424,7 +424,7 @@
      "taskmaster1": {
       "n": 8,
       "kind_acc": 1.0,
-      "strict_acc": 1.0,
+      "strict_acc": 0.875,
       "confirm_fp_rate": 0.0,
       "confirm_fp_count": 0,
       "confirm_recall": null,
@@ -441,53 +441,53 @@
    "all": {
     "n": 142,
     "kind_acc": 0.993,
-    "strict_acc": 0.993,
+    "strict_acc": 0.965,
     "confirm_fp_rate": 0.0,
     "confirm_fp_count": 0,
-    "confirm_recall": 1.0,
+    "confirm_recall": 0.9,
     "oos_false_action_rate": 0.0,
     "fields": {
      "area": 1.0,
      "booking_ref": 1.0,
      "budget_inr": 1.0,
-     "date_expr": 1.0,
+     "date_expr": 0.957,
      "memory_key": 1.0,
      "memory_op": 1.0,
      "memory_value": 1.0,
      "no_budget": 1.0,
      "option_index": 1.0,
      "provider_ref": 1.0,
-     "service": 1.0,
+     "service": 0.971,
      "task": 1.0,
      "time_expr": 1.0
     }
    },
    "dev": {
     "n": 74,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
+    "kind_acc": 0.986,
+    "strict_acc": 0.946,
     "confirm_fp_rate": 0.0,
     "confirm_fp_count": 0,
-    "confirm_recall": 1.0,
+    "confirm_recall": 0.857,
     "oos_false_action_rate": 0.0,
     "fields": {
      "area": 1.0,
      "budget_inr": 1.0,
-     "date_expr": 1.0,
+     "date_expr": 0.962,
      "memory_key": 1.0,
      "memory_op": 1.0,
      "memory_value": 1.0,
      "no_budget": 1.0,
      "option_index": 1.0,
      "provider_ref": 1.0,
-     "service": 1.0,
+     "service": 0.947,
      "task": 1.0,
      "time_expr": 1.0
     }
    },
    "test": {
     "n": 68,
-    "kind_acc": 0.985,
+    "kind_acc": 1.0,
     "strict_acc": 0.985,
     "confirm_fp_rate": 0.0,
     "confirm_fp_count": 0,
@@ -497,7 +497,7 @@
      "area": 1.0,
      "booking_ref": 1.0,
      "budget_inr": 1.0,
-     "date_expr": 1.0,
+     "date_expr": 0.952,
      "memory_op": 1.0,
      "option_index": 1.0,
      "provider_ref": 1.0,
@@ -625,7 +625,8 @@
    "pred": {
     "kind": "provide_details",
     "date_expr": "date:2026-11-14",
-    "time_expr": "at:18:00"
+    "time_expr": "at:18:00",
+    "is_correction": true
    },
    "error": null
   },
@@ -680,7 +681,8 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "date:2027-03-08"
+    "date_expr": "date:2027-03-08",
+    "is_correction": true
    },
    "error": null
   },
@@ -766,7 +768,7 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "date:2026-11-11",
+    "date_expr": "weekday:wed",
     "time_expr": "at:14:15"
    },
    "error": null
@@ -985,17 +987,17 @@
    },
    "kind_ok": true,
    "fields": {
-    "date_expr": true,
+    "date_expr": false,
     "time_expr": true
    },
    "spurious": [],
-   "strict": true,
+   "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "date:2026-11-09",
+    "date_expr": "weekday:mon",
     "time_expr": "at:13:00"
    },
    "error": null
@@ -1107,7 +1109,8 @@
    "pred": {
     "kind": "provide_details",
     "date_expr": "date:2026-11-13",
-    "time_expr": "at:14:15"
+    "time_expr": "at:14:15",
+    "is_correction": true
    },
    "error": null
   },
@@ -1253,7 +1256,7 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "date:2026-11-11",
+    "date_expr": "weekday:wed",
     "time_expr": "at:14:45"
    },
    "error": null
@@ -1334,14 +1337,17 @@
    "fields": {
     "date_expr": true
    },
-   "spurious": [],
-   "strict": true,
+   "spurious": [
+    "time_expr"
+   ],
+   "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "today"
+    "date_expr": "today",
+    "time_expr": "any"
    },
    "error": null
   },
@@ -1370,7 +1376,7 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "tomorrow"
+    "date_expr": "today"
    },
    "error": null
   },
@@ -1396,7 +1402,8 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "this_week"
+    "date_expr": "this_week",
+    "also_requested": "asks which days the plumber has available"
    },
    "error": null
   },
@@ -1448,7 +1455,8 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "time_expr": "at:17:30"
+    "time_expr": "at:17:30",
+    "is_correction": true
    },
    "error": null
   },
@@ -3606,15 +3614,16 @@
    "expected": {
     "kind": "confirm"
    },
-   "kind_ok": true,
+   "kind_ok": false,
    "fields": {},
    "spurious": [],
-   "strict": true,
+   "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "confirm"
+    "kind": "provide_details",
+    "provider_ref": "that"
    },
    "error": null
   },
@@ -3676,19 +3685,18 @@
    "kind_ok": true,
    "fields": {
     "task": true,
-    "service": true,
+    "service": false,
     "date_expr": true,
     "time_expr": true
    },
    "spurious": [],
-   "strict": true,
+   "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "start_task",
     "task": "book",
-    "service": "plumber",
     "date_expr": "today",
     "time_expr": "after:16:00"
    },
@@ -3715,7 +3723,8 @@
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "start_task",
+    "task": "book"
    },
    "error": null
   },
@@ -3896,18 +3905,17 @@
    "fields": {
     "task": true,
     "service": true,
-    "date_expr": true
+    "date_expr": false
    },
    "spurious": [],
-   "strict": true,
+   "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "start_task",
     "task": "cancel",
-    "service": "electrician",
-    "date_expr": "weekday:thu"
+    "service": "electrician"
    },
    "error": null
   },
@@ -3972,6 +3980,7 @@
    "oos_false_action": false,
    "pred": {
     "kind": "memory",
+    "area": "Whitefield",
     "memory_op": "correct",
     "memory_key": "home_area",
     "memory_value": "Whitefield"
@@ -4310,7 +4319,7 @@
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "provide_details"
+    "kind": "unclear"
    },
    "error": null
   },
@@ -4358,15 +4367,15 @@
      "provide_details"
     ]
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "list_bookings"
+    "kind": "unclear"
    },
    "error": null
   },
@@ -4443,7 +4452,8 @@
    "pred": {
     "kind": "start_task",
     "task": "book",
-    "service": "plumber"
+    "service": "plumber",
+    "provider_ref": "Sharma Plumbing"
    },
    "error": null
   },
@@ -4553,10 +4563,10 @@
     "task": true,
     "service": true,
     "date_expr": true,
-    "time_expr": false
+    "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
@@ -4565,7 +4575,7 @@
     "task": "book",
     "service": "plumber",
     "date_expr": "tomorrow",
-    "time_expr": "before:23:00"
+    "time_expr": "before:11:00"
    },
    "error": null
   },
@@ -4613,16 +4623,17 @@
    "kind_ok": true,
    "fields": {
     "date_expr": true,
-    "time_expr": false
+    "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "weekday:fri"
+    "date_expr": "weekday:fri",
+    "time_expr": "at:10:30"
    },
    "error": null
   },
@@ -4670,21 +4681,26 @@
     "date_expr": "tomorrow",
     "time_expr": "after:17:00"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "task": false,
-    "service": false,
-    "area": false,
-    "date_expr": false,
-    "time_expr": false
+    "task": true,
+    "service": true,
+    "area": true,
+    "date_expr": true,
+    "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "area": "HSR Layout",
+    "date_expr": "tomorrow",
+    "time_expr": "after:17:00"
    },
    "error": null
   },
@@ -4734,17 +4750,18 @@
     "kind": "provide_details",
     "budget_inr": 800
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "budget_inr": false
+    "budget_inr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "provide_details",
+    "budget_inr": 800
    },
    "error": null
   },
@@ -4786,18 +4803,20 @@
     "task": "book",
     "service": "plumber"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "task": false,
-    "service": false
+    "task": true,
+    "service": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber"
    },
    "error": null
   },
@@ -4882,7 +4901,8 @@
    "pred": {
     "kind": "provide_details",
     "date_expr": "weekday:wed",
-    "time_expr": "morning"
+    "time_expr": "morning",
+    "is_correction": true
    },
    "error": null
   },
@@ -4899,16 +4919,16 @@
    },
    "kind_ok": true,
    "fields": {
-    "date_expr": false
+    "date_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "weekday:sat"
+    "date_expr": "this_week"
    },
    "error": null
   },
@@ -4930,16 +4950,17 @@
    },
    "kind_ok": true,
    "fields": {
-    "date_expr": false,
+    "date_expr": true,
     "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
+    "date_expr": "this_week",
     "time_expr": "evening"
    },
    "error": null
@@ -4955,17 +4976,18 @@
     "kind": "provide_details",
     "date_expr": "today"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "date_expr": false
+    "date_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "provide_details",
+    "date_expr": "today"
    },
    "error": null
   },
@@ -5006,17 +5028,18 @@
     "kind": "provide_details",
     "date_expr": "today"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "date_expr": false
+    "date_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "provide_details",
+    "date_expr": "today"
    },
    "error": null
   },
@@ -5031,17 +5054,21 @@
     "kind": "provide_details",
     "time_expr": "at:16:00"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
     "time_expr": false
    },
-   "spurious": [],
+   "spurious": [
+    "date_expr"
+   ],
    "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "provide_details",
+    "date_expr": "date:2026-11-04",
+    "is_correction": true
    },
    "error": null
   },
@@ -5056,17 +5083,19 @@
     "kind": "provide_details",
     "time_expr": "at:10:00"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "time_expr": false
+    "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "provide_details",
+    "time_expr": "at:10:00",
+    "is_correction": true
    },
    "error": null
   },
@@ -5080,15 +5109,15 @@
    "expected": {
     "kind": "confirm"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "provide_details"
+    "kind": "confirm"
    },
    "error": null
   },
@@ -5102,15 +5131,15 @@
    "expected": {
     "kind": "confirm"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "confirm"
    },
    "error": null
   },
@@ -5201,7 +5230,7 @@
     "task": "book",
     "service": "electrician",
     "date_expr": "tomorrow",
-    "also_requested": "a plumber tomorrow"
+    "also_requested": "book a plumber tomorrow too"
    },
    "error": null
   },
@@ -5284,20 +5313,23 @@
     "task": "reschedule",
     "time_expr": "evening"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "task": false,
+    "task": true,
     "time_expr": true
    },
-   "spurious": [],
+   "spurious": [
+    "service"
+   ],
    "strict": false,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "provide_details",
-    "time_expr": "evening",
-    "is_correction": true
+    "kind": "start_task",
+    "task": "reschedule",
+    "service": "plumber",
+    "time_expr": "evening"
    },
    "error": null
   },
@@ -5348,10 +5380,10 @@
     "service": true,
     "date_expr": true,
     "time_expr": true,
-    "provider_ref": false
+    "provider_ref": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
@@ -5360,7 +5392,8 @@
     "task": "book",
     "service": "electrician",
     "date_expr": "weekday:sat",
-    "time_expr": "afternoon"
+    "time_expr": "afternoon",
+    "provider_ref": "Ravi"
    },
    "error": null
   },
@@ -5389,7 +5422,10 @@
    "pred": {
     "kind": "start_task",
     "task": "book",
-    "service": "plumber"
+    "service": "plumber",
+    "exclude_providers": [
+     "sharma plumbing"
+    ]
    },
    "error": null
   },
@@ -5408,18 +5444,15 @@
      "abort"
     ]
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": true,
-   "oos_false_action": true,
+   "oos_false_action": false,
    "pred": {
-    "kind": "start_task",
-    "task": "book",
-    "service": "plumber",
-    "date_expr": "tomorrow"
+    "kind": "unclear"
    },
    "error": null
   },
@@ -5438,17 +5471,15 @@
      "abort"
     ]
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": true,
-   "oos_false_action": true,
+   "oos_false_action": false,
    "pred": {
-    "kind": "start_task",
-    "task": "book",
-    "service": "cleaning"
+    "kind": "unclear"
    },
    "error": null
   },
@@ -5470,18 +5501,20 @@
    "fields": {
     "task": true,
     "service": true,
-    "time_expr": false,
-    "budget_inr": false
+    "time_expr": true,
+    "budget_inr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
     "kind": "start_task",
     "task": "book",
-    "service": "plumber"
+    "service": "plumber",
+    "time_expr": "after:11:00",
+    "budget_inr": 1200
    },
    "error": null
   },
@@ -5574,7 +5607,8 @@
    "oos_false_action": false,
    "pred": {
     "kind": "provide_details",
-    "date_expr": "day_after_tomorrow"
+    "date_expr": "day_after_tomorrow",
+    "is_correction": true
    },
    "error": null
   },
@@ -5618,20 +5652,24 @@
     "date_expr": "tomorrow",
     "time_expr": "morning"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {
-    "task": false,
-    "service": false,
-    "date_expr": false,
-    "time_expr": false
+    "task": true,
+    "service": true,
+    "date_expr": true,
+    "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow",
+    "time_expr": "morning"
    },
    "error": null
   },
@@ -5645,15 +5683,15 @@
    "expected": {
     "kind": "confirm"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "confirm"
    },
    "error": null
   },
@@ -5667,15 +5705,15 @@
    "expected": {
     "kind": "decline"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": true,
    "oos_false_action": false,
    "pred": {
-    "kind": "unclear"
+    "kind": "decline"
    },
    "error": null
   },
@@ -5699,11 +5737,11 @@
     "task": true,
     "service": true,
     "area": true,
-    "date_expr": false,
-    "time_expr": false
+    "date_expr": true,
+    "time_expr": true
    },
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
@@ -5711,7 +5749,9 @@
     "kind": "start_task",
     "task": "book",
     "service": "plumber",
-    "area": "Indiranagar"
+    "area": "Indiranagar",
+    "date_expr": "tomorrow",
+    "time_expr": "morning"
    },
    "error": null
   },
@@ -5725,15 +5765,15 @@
    "expected": {
     "kind": "confirm"
    },
-   "kind_ok": false,
+   "kind_ok": true,
    "fields": {},
    "spurious": [],
-   "strict": false,
+   "strict": true,
    "confirm_fp": false,
    "oos": false,
    "oos_false_action": false,
    "pred": {
-    "kind": "provide_details"
+    "kind": "confirm"
    },
    "error": null
   }
