@@ -9,7 +9,7 @@ import re
 from collections import Counter, defaultdict
 
 from errand.approval import fingerprint
-from errand.llm.rules import YES
+from errand.llm.rules import is_affirmation
 
 from .harness import Harness
 
@@ -134,7 +134,7 @@ def i7_only_user_turns_grant(h: Harness):
             if start is None:
                 return False, "grant outside a turn"
             text = start.get("text") or ""
-            if start.get("input_kind") != "confirm" and not YES.search(text):
+            if start.get("input_kind") != "confirm" and not is_affirmation(text):
                 return False, f"grant on non-affirmative input {text!r}"
         if e["type"] == "memory" and e.get("op") in ("remember", "confirm", "forget") and e.get("by_turn") is None:
             return False, "memory write without a user turn"

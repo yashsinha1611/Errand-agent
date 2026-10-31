@@ -1,0 +1,234 @@
+{
+ "model": "rule-v1",
+ "summary": {
+  "all": {
+   "n": 142,
+   "kind_acc": 0.69,
+   "strict_acc": 0.451,
+   "confirm_fp_rate": 0.03,
+   "confirm_fp_count": 4,
+   "confirm_recall": 0.7,
+   "oos_false_action_rate": 0.406,
+   "fields": {
+    "area": 1.0,
+    "booking_ref": 1.0,
+    "budget_inr": 0.5,
+    "date_expr": 0.565,
+    "memory_key": 0.0,
+    "memory_op": 0.0,
+    "memory_value": 0.0,
+    "no_budget": 0.0,
+    "option_index": 0.6,
+    "provider_ref": 0.333,
+    "service": 0.914,
+    "task": 0.861,
+    "time_expr": 0.308
+   }
+  },
+  "dev": {
+   "n": 74,
+   "kind_acc": 0.676,
+   "strict_acc": 0.473,
+   "confirm_fp_rate": 0.015,
+   "confirm_fp_count": 1,
+   "confirm_recall": 0.571,
+   "oos_false_action_rate": 0.375,
+   "fields": {
+    "area": 1.0,
+    "budget_inr": 0.333,
+    "date_expr": 0.6,
+    "memory_key": 0.0,
+    "memory_op": 0.0,
+    "memory_value": 0.0,
+    "no_budget": 0.0,
+    "option_index": 0.333,
+    "provider_ref": 0.0,
+    "service": 1.0,
+    "task": 0.947,
+    "time_expr": 0.438
+   }
+  },
+  "test": {
+   "n": 68,
+   "kind_acc": 0.706,
+   "strict_acc": 0.426,
+   "confirm_fp_rate": 0.046,
+   "confirm_fp_count": 3,
+   "confirm_recall": 1.0,
+   "oos_false_action_rate": 0.438,
+   "fields": {
+    "area": 1.0,
+    "booking_ref": 1.0,
+    "budget_inr": 1.0,
+    "date_expr": 0.524,
+    "memory_op": 0.0,
+    "option_index": 1.0,
+    "provider_ref": 0.5,
+    "service": 0.812,
+    "task": 0.765,
+    "time_expr": 0.217
+   }
+  },
+  "by_source": {
+   "adversarial": {
+    "n": 12,
+    "kind_acc": 0.833,
+    "strict_acc": 0.75,
+    "confirm_fp_rate": 0.182,
+    "confirm_fp_count": 2,
+    "confirm_recall": 1.0,
+    "oos_false_action_rate": 0.0,
+    "fields": {}
+   },
+   "clinc150": {
+    "n": 21,
+    "kind_acc": 0.571,
+    "strict_acc": 0.571,
+    "confirm_fp_rate": 0.0,
+    "confirm_fp_count": 0,
+    "confirm_recall": 0.0,
+    "oos_false_action_rate": 0.429,
+    "fields": {}
+   },
+   "handwritten": {
+    "n": 29,
+    "kind_acc": 0.414,
+    "strict_acc": 0.276,
+    "confirm_fp_rate": 0.0,
+    "confirm_fp_count": 0,
+    "confirm_recall": 0.667,
+    "oos_false_action_rate": 0.0,
+    "fields": {
+     "area": 1.0,
+     "budget_inr": 0.5,
+     "date_expr": 0.4,
+     "memory_key": 0.0,
+     "memory_op": 0.0,
+     "memory_value": 0.0,
+     "no_budget": 0.0,
+     "option_index": 0.333,
+     "provider_ref": 0.0,
+     "service": 0.833,
+     "task": 0.833,
+     "time_expr": 0.0
+    }
+   },
+   "hinglish_top": {
+    "n": 25,
+    "kind_acc": 0.72,
+    "strict_acc": 0.36,
+    "confirm_fp_rate": 0.0,
+    "confirm_fp_count": 0,
+    "confirm_recall": 0.0,
+    "oos_false_action_rate": 0.5,
+    "fields": {
+     "area": 1.0,
+     "date_expr": 0.75,
+     "service": 0.929,
+     "task": 0.929,
+     "time_expr": 0.167
+    }
+   },
+   "sgd": {
+    "n": 28,
+    "kind_acc": 0.857,
+    "strict_acc": 0.357,
+    "confirm_fp_rate": 0.08,
+    "confirm_fp_count": 2,
+    "confirm_recall": 0.667,
+    "oos_false_action_rate": 0.5,
+    "fields": {
+     "area": 1.0,
+     "date_expr": 0.286,
+     "service": 1.0,
+     "task": 1.0,
+     "time_expr": 0.083
+    }
+   },
+   "synthetic": {
+    "n": 19,
+    "kind_acc": 0.737,
+    "strict_acc": 0.474,
+    "confirm_fp_rate": 0.0,
+    "confirm_fp_count": 0,
+    "confirm_recall": 0.0,
+    "oos_false_action_rate": 0.0,
+    "fields": {
+     "area": 1.0,
+     "booking_ref": 1.0,
+     "budget_inr": 0.5,
+     "date_expr": 0.6,
+     "memory_key": 0.0,
+     "memory_op": 0.0,
+     "memory_value": 0.0,
+     "option_index": 1.0,
+     "provider_ref": 1.0,
+     "service": 0.889,
+     "task": 0.7,
+     "time_expr": 1.0
+    }
+   },
+   "taskmaster1": {
+    "n": 8,
+    "kind_acc": 1.0,
+    "strict_acc": 0.875,
+    "confirm_fp_rate": 0.0,
+    "confirm_fp_count": 0,
+    "confirm_recall": 0.0,
+    "oos_false_action_rate": 0.0,
+    "fields": {
+     "date_expr": 0.833,
+     "time_expr": 1.0
+    }
+   }
+  },
+  "by_lang": {
+   "en": {
+    "n": 85,
+    "kind_acc": 0.776,
+    "strict_acc": 0.529,
+    "confirm_fp_rate": 0.037,
+    "confirm_fp_count": 3,
+    "confirm_recall": 0.75,
+    "oos_false_action_rate": 0.417,
+    "fields": {
+     "area": 1.0,
+     "booking_ref": 1.0,
+     "budget_inr": 0.5,
+     "date_expr": 0.48,
+     "memory_key": 0.0,
+     "memory_op": 0.0,
+     "memory_value": 0.0,
+     "option_index": 1.0,
+     "provider_ref": 1.0,
+     "service": 0.933,
+     "task": 0.812,
+     "time_expr": 0.476
+    }
+   },
+   "hinglish": {
+    "n": 57,
+    "kind_acc": 0.561,
+    "strict_acc": 0.333,
+    "confirm_fp_rate": 0.02,
+    "confirm_fp_count": 1,
+    "confirm_recall": 0.667,
+    "oos_false_action_rate": 0.375,
+    "fields": {
+     "area": 1.0,
+     "budget_inr": 0.5,
+     "date_expr": 0.667,
+     "memory_key": 0.0,
+     "memory_op": 0.0,
+     "memory_value": 0.0,
+     "no_budget": 0.0,
+     "option_index": 0.333,
+     "provider_ref": 0.0,
+     "service": 0.9,
+     "task": 0.9,
+     "time_expr": 0.111
+    }
+   }
+  }
+ }
+}

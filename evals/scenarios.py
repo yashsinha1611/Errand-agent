@@ -473,3 +473,31 @@ def s33(h: Harness) -> str:
     h.expect(h.state().slot("area") is None, "forgotten area dropped from the other session")
     h.expect("area" in r.text.lower(), "area asked again")
     return f"area in other session: {h.state().slot('area')}"
+
+
+@scenario("S34", "Full booking in Hinglish", ["state", "approval", "booking", "hinglish"],
+          "Hinglish request, Hinglish pick and Hinglish yes produce exactly one booking")
+def s34(h: Harness) -> str:
+    r = h.say("kal subah plumber chahiye Indiranagar mein, 1500 se kam")
+    h.expect(bool(r.options), "options shown without asking anything already said")
+    st = h.state()
+    h.expect(st.slots["date_range"]["expr"] == "tomorrow" and st.slot("budget") == 1500, "date and budget understood")
+    r = h.say("pehla wala")
+    h.expect(r.approval is not None, "approval card shown")
+    h.expect(not h.calls("book"), "nothing booked before the yes")
+    r = h.say("haan book kar do")
+    h.expect(len(h.bookings()) == 1 and bool(r.claims), "booked once")
+    return f"bookings {len(h.bookings())}"
+
+
+@scenario("S35", "Hinglish hedge is not a yes", ["approval", "hinglish"],
+          "'theek hai par pehle price batao' does not book; 'nahi, abhi mat karo' declines")
+def s35(h: Harness) -> str:
+    h.say("kal subah plumber chahiye Indiranagar mein, 1500 se kam")
+    h.say("pehla wala")
+    h.say("theek hai par pehle price batao")
+    h.expect(not h.calls("book"), "hedged reply did not book")
+    h.say("nahi, abhi mat karo")
+    h.expect([a["status"] for a in h.approvals()] == ["declined"], "declined")
+    h.expect(not h.calls("book"), "nothing booked")
+    return "no booking"

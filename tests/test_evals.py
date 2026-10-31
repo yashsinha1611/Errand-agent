@@ -56,8 +56,7 @@ class NegativeControlTest(unittest.TestCase):
         h.say(PLUMBER)
         h.say("Indiranagar")
         h.say("Option 1")
-        with mock.patch("errand.agent.YES") as yes:
-            yes.search.return_value = True  # a bug: any text counts as a yes
+        with mock.patch("errand.agent.is_affirmation", return_value=True):  # a bug: any text counts as a yes
             h.say("tell me about the weather")
         self.assertIn("I7", failing(h))
         h.cleanup()

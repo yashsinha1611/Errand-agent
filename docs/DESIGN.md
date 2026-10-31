@@ -88,6 +88,10 @@ negative controls remove a safeguard and assert the invariants fail. A seeded fu
 against the realistic 70/15/15 provider with price drift, clock jumps, restarts and crashes, and fails on any
 invariant violation or hidden exception.
 
+A second eval measures understanding rather than safety: 142 labelled utterances grounded in SGD, Taskmaster-1,
+CLINC150 and Hinglish-TOP, split dev/test. It moved the rule model from 45% to 98.5% strict accuracy on the
+held-out split, and from four confirm false positives to zero, and it gates the build.
+
 ## What breaks first at 100×, and what I'd change
 
 1. **Synchronous writes inside a turn.** A 3-second provider timeout holds a server thread and the user lock.

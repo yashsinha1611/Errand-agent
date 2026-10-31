@@ -10,7 +10,7 @@ library: nothing to install.
 ## Run it (three commands)
 
 ```bash
-make test     # unit tests, negative controls, fuzz, then 33 scenarios -> reports/eval_table.md
+make test     # unit tests, negative controls, fuzz, intent eval, 35 scenarios -> reports/
 make demo     # web console with streaming chat and live trace: http://127.0.0.1:8765
 make chat     # the same agent in the terminal
 ```
@@ -30,7 +30,7 @@ No `make` (Windows): `python -m unittest discover -s tests -t . && python -m eva
 | 5. Bounded execution | `budget.Budget` (model, tool, step, wall clock, cost); one boundary handler; replies from the outbox truth | S24, S25, S26, S27; invariant I8, I9 |
 | 6. Memory | `memory.MemoryStore`: stated vs inferred, confirm, view, correct, forget with tombstones | S18, S19, S20, S33; `MemoryTest`; invariants I5, I6 |
 | 7. Traces | `tracing.Tracer`: one JSONL per run, allowlist redaction, OTel `gen_ai.*` names, tokens and cost | `TracingTest`; invariant I10; `docs/traces/` |
-| 8. Evals | `evals/`: 33 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz | `make test` |
+| 8. Evals | `evals/`: 35 scripted scenarios, 10 invariants, generated table; negative controls; seeded fuzz | `make test` |
 
 ## Deliverables
 
@@ -42,6 +42,31 @@ No `make` (Windows): `python -m unittest discover -s tests -t . && python -m eva
 | Three real bugs with fixes and regression tests | [`docs/BUGS.md`](docs/BUGS.md) |
 | End-to-end trace with timeout-after-success | [`docs/traces/timeout_after_success.jsonl`](docs/traces/timeout_after_success.jsonl); annotated in the design note |
 | Demo recording plan | [`docs/DEMO.md`](docs/DEMO.md) |
+
+## Is the model understanding people? (interpreter eval)
+
+The scenarios prove the system is safe whatever the model does. A separate eval measures how well the
+interpreter understands real phrasing: 142 labelled utterances grounded in public datasets (SGD, Taskmaster-1,
+CLINC150, Hinglish-TOP) plus handwritten Hinglish, synthetic and adversarial rows, split into dev and held-out
+test. Sources, method and licences: [`evals/data/SOURCES.md`](evals/data/SOURCES.md). Report:
+[`reports/intent_eval.md`](reports/intent_eval.md).
+
+| Rule model | Before (baseline) | After dev-driven fixes |
+| --- | --- | --- |
+| Strict accuracy, all | 45.1% | 99.3% |
+| Strict accuracy, held-out test | 42.6% | 98.5% |
+| Strict accuracy, Hinglish | 33.3% | 100% |
+| Confirm false positives (safety) | 4 | 0 |
+| Out-of-scope requests turned into actions | 40.6% | 0% |
+
+The safety gates (zero confirm false positives, at most 5% out-of-scope actions, at least 95% held-out accuracy)
+run in `make test`. To measure Claude: `ANTHROPIC_API_KEY=… make intent-eval MODEL=claude RECORD=1` records its
+outputs to `evals/fixtures/claude/`; `make intent-eval MODEL=recorded` then replays them offline.
+
+**Hinglish.** The agent understands Hindi-English code-mixed requests ("kal subah plumber chahiye Indiranagar
+mein, 1500 se kam", "pehla wala", "haan book kar do"), in both the rule model and the Claude prompt. Replies stay
+in English so that the approval text (provider, slot, price) is unambiguous; localized reply templates are the
+natural next step.
 
 ## Readings of the brief's ambiguities
 

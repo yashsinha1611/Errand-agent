@@ -24,7 +24,7 @@ from .domain import AREAS, SERVICES, Approval, ErrandState, Intent, TurnResult, 
 from .interpreter import Interpreter
 from .llm.anthropic import AnthropicModel
 from .llm.base import Model
-from .llm.rules import YES, RuleModel
+from .llm.rules import RuleModel, is_affirmation
 from .memory import MemoryStore, label_for
 from .mock.provider import MockProvider
 from .provider_client import ProviderClient, Result
@@ -255,6 +255,10 @@ class AgentService:
             ctx.outcome = "unclear_limit"
             ctx.say("I couldn’t follow the last few messages, so I’ve stopped this request. Nothing was booked. "
                     + narrate.help_text())
+            return
+        pending = self.gate.pending(s.session_id)
+        if pending:  # e.g. "theek hai par pehle price batao": restate exactly what is waiting for approval
+            ctx.say(f"Here’s exactly what’s waiting for your approval: {pending.prompt_text}")
             return
         question = self._current_question(ctx)
         ctx.say("Sorry, I didn’t catch that. " + (question or "Tell me what you need done, for example "
@@ -534,7 +538,7 @@ class AgentService:
             ctx.say("That approval is no longer current: it was replaced or voided. Use the latest one.")
             return
         if pending:
-            if not via_button and not YES.search(inp.text or ""):
+            if not via_button and not is_affirmation(inp.text or ""):
                 ctx.trace.emit("approval", op="grant_refused", id=pending.id,
                                reason="no explicit yes in the user's own words")
                 ctx.say("I need a clear yes from you to go ahead. " + pending.prompt_text)

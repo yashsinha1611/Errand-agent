@@ -65,3 +65,7 @@ for every reader, not just the one that heard the request.
 | fuzz | seeded id generators restarted from the same seed after a restart and reissued approval ids (`IntegrityError`) | a persisted boot counter is mixed into the seed; fuzz |
 | fuzz | a budget change during a reschedule read `selection["price"]`, which only booking selections have | fuzz (it now also fails on any hidden exception) |
 | unit test | "cancel my plumber booking" was routed to "list my bookings" | `RulesTest.test_regression_cancel_is_not_list_bookings` |
+| intent eval (SGD) | "Yes, can you please make me an appointment on the 1st?" was read as a confirmation: any message starting with "yes" counted. A yes must now be short and unhedged, and the same check guards approvals | `AffirmationTest`, intent-eval gate (zero confirm false positives) |
+| intent eval (CLINC150) | "i would like to book a place to stay in phoenix" started a home-service booking; 41% of out-of-scope requests became actions | intent-eval gate (out-of-scope false actions ≤ 5%) |
+| intent eval (handwritten) | "nahi, abhi mat karo" (no, don't do it now) became a date change because "abhi" was read as today | `RegressionTest.test_abhi_mat_karo_is_a_decline` |
+| intent eval (synthetic) | "day after tomorrow, around 3pm" became "after 3pm" | `RegressionTest.test_day_after_tomorrow_is_not_an_after_bound` |

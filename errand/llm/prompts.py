@@ -22,7 +22,26 @@ before:HH:MM, at:HH:MM. Never compute calendar dates yourself except date:YYYY-M
 - provider_ref: the provider name as said, "last_time" for "same as last time", "that" for "them".
 - Services: plumber, electrician, ac_servicing, cleaning, carpenter. Areas: Indiranagar, Koramangala, \
 HSR Layout, Whitefield. Use null when not stated.
-- If the message is not understandable, kind=unclear.
+- If the message is not understandable, or asks for something other than home services (hotels, cabs,
+alarms, reminders, restaurant tables), kind=unclear. Never start a booking without a home-service need.
+- kind=confirm only for a short, unconditional yes. Anything hedged, conditional, hypothetical, quoted, a
+question, or a "yes" that also asks for something is NOT confirm.
+
+Hinglish (Hindi-English code-mixed, Roman script) is common. Read it the same way:
+- yes: haan, haa, ji, ji haan, theek hai / thik hai, chalo, pakka, bilkul, kar do, book kar do.
+  Not a yes: "theek hai par pehle price batao" (but first tell me the price), "agar sasta ho to haan" (if cheap).
+- no: nahi / nahin / nai, mat karo, rehne do, abhi nahi. "abhi mat karo" means "don't do it now", not a date.
+- dates: aaj / aj = today, kal = tomorrow (future context), parso = day after tomorrow, is hafte / is week =
+  this_week, agle hafte / agle haftey = next_week; weekdays may be Hindi: somvar, mangalvar, budhvar, guruvar,
+  shukravar, shanivar, ravivar. "Saturday ko" = on Saturday.
+- times: subah = morning, dopahar = afternoon, shaam / sham = evening, raat = night; "5 baje" / "5 bajhe" =
+  5 o'clock (read am/pm from subah/shaam), "10 baje ke baad" = after:10:00, "10 baje se pehle nahi" =
+  after:10:00, "10 baje se pehle" = before:10:00.
+- budget: "1500 se kam" / "1500 tak" / "1500 ke andar" = 1500; "koi budget nahi" = no_budget.
+- picks: pehla / pehla wala = option 1, doosra / dusra = 2, teesra = 3.
+- tasks: chahiye, bhej do, bula do, karwana hai = book; shift kar do, badal do = reschedule; cancel kar do = cancel.
+- services: nal (tap) = plumber, bijli = electrician, safai = cleaning, badhai / almari = carpenter.
+- memory: "yaad rakho" = remember, "bhool jao" = forget, "kya yaad hai" = view.
 
 Examples:
 "Find a plumber for my kitchen tap this week, mornings only, under ₹1,500" -> {"kind":"start_task",\
@@ -34,7 +53,13 @@ Examples:
 "the second one" (with options) -> {"kind":"select","option_index":2}
 "yes but make it Wednesday" (approval pending) -> {"kind":"provide_details","date_expr":"weekday:wed",\
 "is_correction":true}
-"forget my area" -> {"kind":"memory","memory_op":"forget","memory_key":"home_area"}"""
+"forget my area" -> {"kind":"memory","memory_op":"forget","memory_key":"home_area"}
+"kal subah plumber chahiye Indiranagar mein, 1500 se kam" -> {"kind":"start_task","task":"book",\
+"service":"plumber","area":"Indiranagar","date_expr":"tomorrow","time_expr":"morning","budget_inr":1500}
+"haan book kar do" (approval pending) -> {"kind":"confirm"}
+"theek hai par pehle price batao" (approval pending) -> {"kind":"unclear"}
+"doosra wala" (with options) -> {"kind":"select","option_index":2}
+"mujhe kal haircut ke liye yaad dilaen" -> {"kind":"unclear"}"""
 
 INTERPRETER_TOOL = ("emit_intent",
                     "Report the structured intent of the user's latest message. Call exactly once per message. "

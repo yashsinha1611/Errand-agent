@@ -1,7 +1,7 @@
 {
- "passed": 33,
- "total": 33,
- "git": "bda5681",
+ "passed": 35,
+ "total": 35,
+ "git": "ce780a8",
  "results": [
   {
    "id": "S01",
@@ -411,6 +411,34 @@
    ],
    "expected": "the other session stops using the forgotten area and asks again",
    "actual": "area in other session: None",
+   "passed": true,
+   "notes": "3 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S34",
+   "title": "Full booking in Hinglish",
+   "covers": [
+    "state",
+    "approval",
+    "booking",
+    "hinglish"
+   ],
+   "expected": "Hinglish request, Hinglish pick and Hinglish yes produce exactly one booking",
+   "actual": "bookings 1",
+   "passed": true,
+   "notes": "5 checks, 10 invariants",
+   "error": null
+  },
+  {
+   "id": "S35",
+   "title": "Hinglish hedge is not a yes",
+   "covers": [
+    "approval",
+    "hinglish"
+   ],
+   "expected": "'theek hai par pehle price batao' does not book; 'nahi, abhi mat karo' declines",
+   "actual": "no booking",
    "passed": true,
    "notes": "3 checks, 10 invariants",
    "error": null
