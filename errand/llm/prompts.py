@@ -24,6 +24,9 @@ before:HH:MM, at:HH:MM. Never compute calendar dates yourself except date:YYYY-M
 HSR Layout, Whitefield. Use null when not stated.
 - If the message is not understandable, or asks for something other than home services (hotels, cabs,
 alarms, reminders, restaurant tables), kind=unclear. Never start a booking without a home-service need.
+- While collecting details, "no preference" / "anything is fine" / "kuch bhi chalega" answers the optional
+time and budget question: provide_details with time_expr "any" and/or no_budget true, only for fields not
+already in context.known. It is never a decline.
 - kind=confirm only for a short, unconditional yes. Anything hedged, conditional, hypothetical, quoted, a
 question, or a "yes" that also asks for something is NOT confirm.
 

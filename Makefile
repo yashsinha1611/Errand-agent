@@ -1,6 +1,6 @@
 PY ?= python3
 
-.PHONY: test demo chat evals clean intent-eval golden-verify review-sheet agreement check-llm live-scenarios
+.PHONY: test demo chat evals clean intent-eval golden-verify review-sheet agreement check-llm live-scenarios hard-probes
 
 test:            ## unit tests, negative controls, fuzz, intent eval and 35 scenarios -> reports/
 	$(PY) -m unittest discover -s tests -t . && $(PY) -m evals.intent_eval && $(PY) -m evals.run
@@ -34,3 +34,6 @@ check-llm:       ## preflight: three probes against the live model (needs ANTHRO
 
 live-scenarios:  ## all 35 scenarios with Claude reading every message, TRIALS times each (default 3)
 	$(PY) -m evals.live --trials $(or $(TRIALS),3) $(if $(ONLY),--only $(ONLY),)
+
+hard-probes:     ## 73 hard English and Hinglish probes against Claude (MODEL=rule for the offline baseline)
+	$(PY) -m evals.hard --model $(or $(MODEL),claude) $(if $(ONLY),--only $(ONLY),) $(if $(LANG_),--lang $(LANG_),)

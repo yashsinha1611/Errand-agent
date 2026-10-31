@@ -19,13 +19,18 @@ YES_LEAD = re.compile(
     r"that'?s (right|fine|it|correct)|let'?s do|lets do|haan|haa|ha|ji|theek hai|thik hai|chalo|pakka|"
     r"bilkul|sahi hai|kar do|book kar do|wahi)\b", re.I)
 HEDGE = re.compile(r"\?|\b(not|n't|no|nahi|nahin|nai|mat|ruko|wait|but|par|lekin|if|agar|first|pehle|maybe|"
-                   r"shayad|would|could|can you|later|baad mein|all|future|automatically)\b", re.I)
+                   r"shayad|would|could|can you|later|baad mein|all|future|automatically|unless|except|only|provided|"
+                   r"as long as|assuming|in case|otherwise|warna|sirf|jab tak|na ho|nahi ho|varna)\b", re.I)
 NO_LEAD = re.compile(r"^\s*(no|nope|nah|don'?t|do not|not now|never ?mind|keep it as is|cancel that|not that one|"
                      r"nahi|nahin|nai|mat karo|rehne do|nahi chahiye|abhi nahi)\b", re.I)
 ABORT = re.compile(r"^\s*(never ?mind|forget it|start over|stop|leave it|nothing|rehne do|chhodo|chodo|kuch nahi)\b",
                    re.I)
 GREETING = re.compile(r"^\s*(hi|hello|hey|namaste|namaskar|good (morning|afternoon|evening)|help|what can you do|"
                       r"thanks?|thank you|shukriya|dhanyavaad)\b", re.I)
+NO_PREFERENCE = re.compile(
+    r"^\s*(no (particular |real )?preference|no pref|anything( is)?( fine| works| ok)?|any ?time( is fine| works)?|"
+    r"doesn'?t matter|whatever( works)?|either is fine|skip|koi (bhi|preference nahi|farak nahi)|kuch bhi( chalega)?|"
+    r"jo bhi( chalega)?|kabhi bhi( chalega)?)\s*[.!]*\s*$", re.I)
 CORRECTION = re.compile(r"\b(actually|instead|make it|change (it|that) to|rather|switch to|not .{1,20} but|"
                         r"balki|ki jagah)\b", re.I)
 
@@ -365,6 +370,17 @@ def interpret(message: str, ctx: dict) -> dict:
     mem = memory_intent(t, ctx)
     if mem:
         return mem
+
+    if NO_PREFERENCE.match(t) and ctx.get("task") and ctx.get("phase") == "collecting" \
+            and not ctx.get("awaiting_approval"):
+        # "no preference" answers the optional time/budget question: skip only what isn't known yet
+        known = ctx.get("known") or {}
+        out: dict = {"kind": "provide_details"}
+        if not known.get("time_window"):
+            out["time_expr"] = "any"
+        if not known.get("budget"):
+            out["no_budget"] = True
+        return out
 
     details: dict = {}
     if (s := find_service(tl)):

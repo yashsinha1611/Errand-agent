@@ -59,6 +59,25 @@ class AffirmationTest(unittest.TestCase):
             self.assertFalse(is_affirmation(t), t)
 
 
+class ApprovalGuardTest(unittest.TestCase):
+    """The code-level yes check is the backstop when the model is wrong: every hard-probe approval trap must
+    fail it, and every positive control must pass it, whatever the model says."""
+
+    def test_every_approval_trap_is_rejected_and_every_real_yes_accepted(self):
+        from evals.hard import P
+        for p in P:
+            if p.group == "approval traps":
+                self.assertFalse(is_affirmation(p.text), f"{p.id}: {p.text}")
+            if p.group == "positive controls":
+                self.assertTrue(is_affirmation(p.text), f"{p.id}: {p.text}")
+
+    def test_conditional_yes_does_not_book(self):
+        # Bug: "yes, unless it's Sharma" with Sharma's card open passed the guard and booked Sharma.
+        for t in ("yes, unless it's Sharma", "ok except if it's after 5", "haan, bas Sharma wala na ho",
+                  "yes provided it's under 1200", "theek hai jab tak 1200 se kam ho"):
+            self.assertFalse(is_affirmation(t), t)
+
+
 class RegressionTest(unittest.TestCase):
     def test_abhi_mat_karo_is_a_decline(self):
         self.assertEqual(interpret("nahi, abhi mat karo", APPROVAL)["kind"], "decline")
@@ -66,6 +85,13 @@ class RegressionTest(unittest.TestCase):
     def test_day_after_tomorrow_is_not_an_after_bound(self):
         r = interpret("Can you get an AC technician to Koramangala day after tomorrow, around 3pm?", {"today": "2026-11-02"})
         self.assertEqual((r["date_expr"], r["time_expr"]), ("day_after_tomorrow", "at:15:00"))
+
+    def test_no_preference_skips_optional_fields_not_a_decline(self):
+        # Bug (present since v1): the agent says 'Say "no preference" to skip', and that reply was read as a decline.
+        r = interpret("no preference", {**COLLECT, "known": {"service": "plumber"}})
+        self.assertEqual((r["kind"], r.get("time_expr"), r.get("no_budget")), ("provide_details", "any", True))
+        r = interpret("kuch bhi chalega", {**COLLECT, "known": {"budget": "under ₹1,500"}})
+        self.assertNotIn("no_budget", r)  # never erases a budget the user already gave
 
     def test_hinglish_times(self):
         self.assertEqual(interpret("kal sham 5 baje", COLLECT)["time_expr"], "at:17:00")
