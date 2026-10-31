@@ -1,29 +1,50 @@
-"""Gate on the interpreter eval: a parser change that hurts accuracy or safety fails the build."""
+"""Gates on the interpreter eval, plus golden-set integrity."""
+import os
+import shutil
+import tempfile
 import unittest
+from unittest import mock
 
 from errand.llm.rules import RuleModel, interpret, is_affirmation
+from evals import golden
 from evals.intent_eval import evaluate, load, summarize
 
 APPROVAL = {"today": "2026-11-02", "task": "book", "phase": "awaiting_approval", "awaiting_approval": True}
 COLLECT = {"today": "2026-11-02", "task": "book", "phase": "collecting"}
 
 
+class GoldenIntegrityTest(unittest.TestCase):
+    def test_current_version_is_intact(self):
+        m = golden.verify()
+        self.assertEqual(set(m["files"]), set(golden.SUITES))
+
+    def test_an_edited_golden_file_fails_loudly(self):
+        tmp = tempfile.mkdtemp()
+        shutil.copytree(os.path.join(golden.GOLDEN, golden.CURRENT), os.path.join(tmp, golden.CURRENT))
+        with open(os.path.join(tmp, golden.CURRENT, "regression.jsonl"), "a", encoding="utf-8") as fh:
+            fh.write("\n")
+        with mock.patch.object(golden, "GOLDEN", tmp), self.assertRaises(golden.GoldenIntegrityError):
+            golden.verify()
+        shutil.rmtree(tmp)
+
+
 class IntentEvalGate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.summary = summarize(evaluate(RuleModel(), load()))
+        cls.reg = cls.summary["suites"]["regression"]
 
-    def test_never_confirms_without_a_real_yes(self):
-        self.assertEqual(self.summary["all"]["confirm_fp_count"], 0)
+    def test_never_confirms_without_a_real_yes_in_any_suite(self):
+        self.assertEqual(self.summary["confirm_fp_total"], 0)
 
     def test_out_of_scope_requests_do_not_become_actions(self):
-        self.assertLessEqual(self.summary["all"]["oos_false_action_rate"], 0.05)
+        self.assertLessEqual(self.reg["all"]["oos_false_action_rate"], 0.05)
 
-    def test_held_out_accuracy(self):
-        self.assertGreaterEqual(self.summary["test"]["strict_acc"], 0.95)
+    def test_held_out_regression_accuracy(self):
+        self.assertGreaterEqual(self.reg["test"]["strict_acc"], 0.95)
 
-    def test_hinglish_accuracy(self):
-        self.assertGreaterEqual(self.summary["by_lang"]["hinglish"]["strict_acc"], 0.95)
+    def test_hinglish_regression_accuracy(self):
+        self.assertGreaterEqual(self.reg["by_lang"]["hinglish"]["strict_acc"], 0.95)
 
 
 class AffirmationTest(unittest.TestCase):
@@ -40,11 +61,9 @@ class AffirmationTest(unittest.TestCase):
 
 class RegressionTest(unittest.TestCase):
     def test_abhi_mat_karo_is_a_decline(self):
-        # Bug: "abhi" (now) was read as a date, turning "don't do it now" into a date change.
         self.assertEqual(interpret("nahi, abhi mat karo", APPROVAL)["kind"], "decline")
 
     def test_day_after_tomorrow_is_not_an_after_bound(self):
-        # Bug: the "after" in "day after tomorrow" made "around 3pm" into "after 3pm".
         r = interpret("Can you get an AC technician to Koramangala day after tomorrow, around 3pm?", {"today": "2026-11-02"})
         self.assertEqual((r["date_expr"], r["time_expr"]), ("day_after_tomorrow", "at:15:00"))
 

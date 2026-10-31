@@ -28,8 +28,9 @@ from errand.interpreter import Interpreter
 from errand.llm.base import Model
 from errand.llm.rules import RuleModel
 
+from . import golden
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, "evals", "data", "intents.jsonl")
 FIXTURES = os.path.join(ROOT, "evals", "fixtures", "claude")
 REPORT_MD = os.path.join(ROOT, "reports", "intent_eval.md")
 REPORT_JSON = os.path.join(ROOT, "reports", "intent_eval.json")
@@ -80,9 +81,10 @@ class _Meter:
         return resp
 
 
-def load(split: str | None = None) -> list[dict]:
-    with open(DATA, encoding="utf-8") as fh:
-        rows = [json.loads(line) for line in fh if line.strip()]
+def load(split: str | None = None, suites: tuple[str, ...] = golden.SUITES,
+         version: str = golden.CURRENT) -> list[dict]:
+    """Rows from the frozen golden suites; checksums are verified first."""
+    rows = [r for suite in suites for r in golden.load_suite(suite, version)]
     return [r for r in rows if split is None or r["split"] == split]
 
 
@@ -153,40 +155,50 @@ def evaluate(model: Model, rows: list[dict]) -> list[dict]:
         except Exception as exc:  # noqa: BLE001 - a crash is scored as a wrong answer
             pred, error = Intent(kind="unclear"), f"{type(exc).__name__}: {exc}"
         s = score(r, pred)
-        out.append({**{k: r[k] for k in ("id", "split", "source", "lang", "text", "expected")}, **s, "error": error})
+        out.append({**{k: r.get(k) for k in ("id", "suite", "split", "source", "lang", "text", "expected")}, **s,
+                    "error": error})
     return out
 
 
+def block(rs: list[dict]) -> dict:
+    n = len(rs)
+    if not n:
+        return {"n": 0}
+    non_confirm = [r for r in rs if "confirm" not in _as_list(r["expected"]["kind"])]
+    confirms = [r for r in rs if "confirm" in _as_list(r["expected"]["kind"])]
+    oos = [r for r in rs if r["oos"]]
+    field_tot, field_ok = defaultdict(int), defaultdict(int)
+    for r in rs:
+        for f, ok in r["fields"].items():
+            field_tot[f] += 1
+            field_ok[f] += ok
+    return {
+        "n": n,
+        "kind_acc": round(sum(r["kind_ok"] for r in rs) / n, 3),
+        "strict_acc": round(sum(r["strict"] for r in rs) / n, 3),
+        "confirm_fp_rate": round(sum(r["confirm_fp"] for r in non_confirm) / max(1, len(non_confirm)), 3),
+        "confirm_fp_count": sum(r["confirm_fp"] for r in non_confirm),
+        "confirm_recall": round(sum(r["pred"].get("kind") == "confirm" for r in confirms) / max(1, len(confirms)), 3)
+        if confirms else None,
+        "oos_false_action_rate": round(sum(r["oos_false_action"] for r in oos) / max(1, len(oos)), 3) if oos else None,
+        "fields": {f: round(field_ok[f] / field_tot[f], 3) for f in sorted(field_tot)},
+    }
+
+
 def summarize(results: list[dict]) -> dict:
-    def block(rs: list[dict]) -> dict:
-        n = len(rs)
-        if not n:
-            return {"n": 0}
-        non_confirm = [r for r in rs if "confirm" not in _as_list(r["expected"]["kind"])]
-        confirms = [r for r in rs if "confirm" in _as_list(r["expected"]["kind"])]
-        oos = [r for r in rs if r["oos"]]
-        field_tot, field_ok = defaultdict(int), defaultdict(int)
-        for r in rs:
-            for f, ok in r["fields"].items():
-                field_tot[f] += 1
-                field_ok[f] += ok
-        return {
-            "n": n,
-            "kind_acc": round(sum(r["kind_ok"] for r in rs) / n, 3),
-            "strict_acc": round(sum(r["strict"] for r in rs) / n, 3),
-            "confirm_fp_rate": round(sum(r["confirm_fp"] for r in non_confirm) / max(1, len(non_confirm)), 3),
-            "confirm_fp_count": sum(r["confirm_fp"] for r in non_confirm),
-            "confirm_recall": round(sum(r["pred"].get("kind") == "confirm" for r in confirms) / max(1, len(confirms)), 3),
-            "oos_false_action_rate": round(sum(r["oos_false_action"] for r in oos) / max(1, len(oos)), 3),
-            "fields": {f: round(field_ok[f] / field_tot[f], 3) for f in sorted(field_tot)},
+    out: dict = {"suites": {}}
+    for suite in sorted({r["suite"] for r in results}):
+        rs = [r for r in results if r["suite"] == suite]
+        out["suites"][suite] = {
+            "all": block(rs), "dev": block([r for r in rs if r["split"] == "dev"]),
+            "test": block([r for r in rs if r["split"] == "test"]),
+            "by_lang": {lang: block([r for r in rs if r["lang"] == lang]) for lang in sorted({r["lang"] for r in rs})},
+            "by_source": {s_: block([r for r in rs if r["source"] == s_]) for s_ in sorted({r["source"] for r in rs})},
         }
-    out = {"all": block(results)}
-    for split in ("dev", "test"):
-        out[split] = block([r for r in results if r["split"] == split])
-    out["by_source"] = {s: block([r for r in results if r["source"] == s])
-                        for s in sorted({r["source"] for r in results})}
-    out["by_lang"] = {lang: block([r for r in results if r["lang"] == lang])
-                      for lang in sorted({r["lang"] for r in results})}
+    gated = [r for r in results if r["suite"] in ("regression", "adversarial")]
+    out["gated"] = {"all": block(gated), "dev": block([r for r in gated if r["split"] == "dev"]),
+                    "test": block([r for r in gated if r["split"] == "test"])}
+    out["confirm_fp_total"] = sum(r["confirm_fp"] for r in results)
     return out
 
 
@@ -218,53 +230,68 @@ def write_report(model_name: str, summary: dict, results: list[dict], meter: _Me
     if os.path.exists(BASELINE):
         with open(BASELINE, encoding="utf-8") as fh:
             base = json.load(fh)
+    m = golden.manifest()
     lines = [f"# Interpreter eval: {model_name}", "",
-             f"{summary['all']['n']} labelled utterances · generated {datetime.datetime.now():%Y-%m-%d %H:%M} by "
-             "`python -m evals.intent_eval`. Data and provenance: `evals/data/intents.jsonl`, `evals/data/SOURCES.md`.",
-             "", "## Headline", "",
-             "| Metric | dev | test | all |" + (" baseline (all) |" if base else ""),
-             "| --- | --- | --- | --- |" + (" --- |" if base else "")]
-    for key, label in [("kind_acc", "Intent kind accuracy"), ("strict_acc", "Strict accuracy (kind + every field)"),
-                       ("confirm_fp_rate", "Confirm false-positive rate (safety, want 0)"),
-                       ("confirm_recall", "Confirm recall"),
-                       ("oos_false_action_rate", "Out-of-scope false-action rate (want 0)")]:
-        cells = [_pct(summary[s].get(key)) for s in ("dev", "test", "all")]
-        extra = f" {_pct(base['summary']['all'].get(key))} |" if base else ""
-        lines.append(f"| {label} | {' | '.join(cells)} |{extra}")
-    lines += ["", "## By language and source (strict accuracy)", "", "| Group | n | kind | strict |", "| --- | --- | --- | --- |"]
-    for group, blocks in (("lang", summary["by_lang"]), ("source", summary["by_source"])):
-        for name, b in blocks.items():
-            lines.append(f"| {group}: {name} | {b['n']} | {_pct(b['kind_acc'])} | {_pct(b['strict_acc'])} |")
-    lines += ["", "## Field accuracy (rows where the field is labelled)", "", "| Field | accuracy |", "| --- | --- |"]
-    for f, v in summary["all"]["fields"].items():
+             f"Golden set **{m['version']}** (frozen {m['created']}, checksums verified) · {len(results)} utterances · "
+             f"generated {datetime.datetime.now():%Y-%m-%d %H:%M} by `python -m evals.intent_eval`. "
+             "Release note: `evals/data/golden/v1/RELEASE.md`; provenance: `evals/data/SOURCES.md`.", "",
+             "## Suites", "",
+             "| Suite | Rows | Kind | Strict (test) | Strict (all) | Confirm false positives | Out-of-scope false actions | Gate |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+    for suite in ("regression", "adversarial", "capability"):
+        b = summary["suites"].get(suite)
+        if not b:
+            continue
+        a = b["all"]
+        lines.append(f"| {suite} | {a['n']} | {_pct(a['kind_acc'])} | {_pct(b['test'].get('strict_acc'))} | "
+                     f"{_pct(a['strict_acc'])} | {a['confirm_fp_count']} | {_pct(a['oos_false_action_rate'])} | "
+                     f"{m['gates'][suite]} |")
+    if base:
+        b0, g = base["summary"]["all"], summary["gated"]["all"]
+        lines += ["", "## Against the baseline (regression + adversarial, before the dev-driven parser fixes)", "",
+                  "| Metric | baseline | now |", "| --- | --- | --- |",
+                  f"| Strict accuracy | {_pct(b0['strict_acc'])} | {_pct(g['strict_acc'])} |",
+                  f"| Kind accuracy | {_pct(b0['kind_acc'])} | {_pct(g['kind_acc'])} |",
+                  f"| Confirm false positives | {b0['confirm_fp_count']} | {g['confirm_fp_count']} |",
+                  f"| Out-of-scope false actions | {_pct(b0['oos_false_action_rate'])} | {_pct(g['oos_false_action_rate'])} |"]
+    lines += ["", "## By language (strict accuracy)", "", "| Suite | Language | n | strict |", "| --- | --- | --- | --- |"]
+    for suite, b in summary["suites"].items():
+        for lang, lb in b["by_lang"].items():
+            lines.append(f"| {suite} | {lang} | {lb['n']} | {_pct(lb['strict_acc'])} |")
+    lines += ["", "## By source (strict accuracy)", "", "| Suite | Source | n | strict |", "| --- | --- | --- | --- |"]
+    for suite, b in summary["suites"].items():
+        for src, sb in b["by_source"].items():
+            lines.append(f"| {suite} | {src} | {sb['n']} | {_pct(sb['strict_acc'])} |")
+    lines += ["", "## Field accuracy, regression suite", "", "| Field | accuracy |", "| --- | --- |"]
+    for f, v in summary["suites"]["regression"]["all"]["fields"].items():
         lines.append(f"| {f} | {_pct(v)} |")
     if meter.calls:
         lat = sorted(meter.latencies)
-        p50 = lat[len(lat) // 2]
-        p95 = lat[min(len(lat) - 1, int(len(lat) * 0.95))]
-        lines += ["", "## Cost and latency", "",
-                  f"{meter.calls} model calls · {meter.tin} input and {meter.tout} output tokens · "
-                  f"${meter.cost:.4f} · p50 {p50:.0f} ms · p95 {p95:.0f} ms"]
-    fails = [r for r in results if not r["strict"]]
-    lines += ["", f"## Misses ({len(fails)})", "",
-              "| id | split | text | expected | predicted | why |", "| --- | --- | --- | --- | --- | --- |"]
-    for r in fails:
-        why = []
-        if not r["kind_ok"]:
-            why.append("kind")
-        why += [f for f, ok in r["fields"].items() if not ok]
-        why += [f"invented {f}" for f in r["spurious"]]
-        if r["confirm_fp"]:
-            why.insert(0, "**CONFIRM FALSE POSITIVE**")
-        cell = lambda v: json.dumps(v, ensure_ascii=False).replace("|", "\\|")  # noqa: E731
-        lines.append(f"| {r['id']} | {r['split']} | {r['text'].replace('|', '/')} | {cell(r['expected'])} | "
-                     f"{cell(r['pred'])} | {', '.join(why)} |")
+        p50, p95 = lat[len(lat) // 2], lat[min(len(lat) - 1, int(len(lat) * 0.95))]
+        lines += ["", "## Cost and latency", "", f"{meter.calls} model calls · {meter.tin} input and {meter.tout} "
+                  f"output tokens · ${meter.cost:.4f} · p50 {p50:.0f} ms · p95 {p95:.0f} ms"]
+    for suite in ("regression", "adversarial", "capability"):
+        fails = [r for r in results if r["suite"] == suite and not r["strict"]]
+        lines += ["", f"## Misses: {suite} ({len(fails)})", ""]
+        if not fails:
+            lines.append("None.")
+            continue
+        lines += ["| id | split | text | expected | predicted | why |", "| --- | --- | --- | --- | --- | --- |"]
+        for r in fails:
+            why = [] if r["kind_ok"] else ["kind"]
+            why += [f for f, ok in r["fields"].items() if not ok] + [f"invented {f}" for f in r["spurious"]]
+            if r["confirm_fp"]:
+                why.insert(0, "**CONFIRM FALSE POSITIVE**")
+            cell = lambda v: json.dumps(v, ensure_ascii=False).replace("|", "\\|")  # noqa: E731
+            lines.append(f"| {r['id']} | {r['split']} | {r['text'].replace('|', '/')} | {cell(r['expected'])} | "
+                         f"{cell(r['pred'])} | {', '.join(why)} |")
     md = "\n".join(lines) + "\n"
     os.makedirs(os.path.dirname(REPORT_MD), exist_ok=True)
     with open(REPORT_MD, "w", encoding="utf-8") as fh:
         fh.write(md)
     with open(REPORT_JSON, "w", encoding="utf-8") as fh:
-        json.dump({"model": model_name, "summary": summary, "results": results}, fh, ensure_ascii=False, indent=1)
+        json.dump({"model": model_name, "golden": m["version"], "summary": summary, "results": results}, fh,
+                  ensure_ascii=False, indent=1)
     return md
 
 
@@ -272,25 +299,19 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="rule", choices=["rule", "claude", "recorded"])
     ap.add_argument("--record", action="store_true", help="with --model claude: save outputs as fixtures")
-    ap.add_argument("--split", choices=["dev", "test"])
-    ap.add_argument("--save-baseline", action="store_true")
+    ap.add_argument("--suite", choices=golden.SUITES, action="append", help="default: all suites")
     args = ap.parse_args(argv)
     meter = _Meter(build_model(args.model, args.record))
-    results = evaluate(meter, load(args.split))
+    results = evaluate(meter, load(suites=tuple(args.suite or golden.SUITES)))
     summary = summarize(results)
     write_report(meter.name, summary, results, meter)
-    if args.save_baseline:
-        with open(BASELINE, "w", encoding="utf-8") as fh:
-            json.dump({"model": meter.name, "summary": summary}, fh, indent=1)
-    a = summary["all"]
-    print(f"{meter.name}: kind {_pct(a['kind_acc'])} · strict {_pct(a['strict_acc'])} · "
-          f"confirm FP {a['confirm_fp_count']} ({_pct(a['confirm_fp_rate'])}) · "
-          f"OOS false action {_pct(a['oos_false_action_rate'])}")
-    for split in ("dev", "test"):
-        s = summary[split]
-        print(f"  {split:4}: n={s['n']} kind {_pct(s['kind_acc'])} strict {_pct(s['strict_acc'])}")
-    for lang, s in summary["by_lang"].items():
-        print(f"  {lang:9}: n={s['n']} kind {_pct(s['kind_acc'])} strict {_pct(s['strict_acc'])}")
+    print(f"{meter.name} on golden {golden.CURRENT} (checksums verified)")
+    for suite, b in summary["suites"].items():
+        a = b["all"]
+        print(f"  {suite:11} n={a['n']:3}  kind {_pct(a['kind_acc']):>6}  strict {_pct(a['strict_acc']):>6}  "
+              f"test strict {_pct(b['test'].get('strict_acc')):>6}  confirm FP {a['confirm_fp_count']}")
+        for lang, lb in b["by_lang"].items():
+            print(f"      {lang:10} n={lb['n']:3}  strict {_pct(lb['strict_acc'])}")
     print(f"Report: {os.path.relpath(REPORT_MD, ROOT)}")
     return 0
 

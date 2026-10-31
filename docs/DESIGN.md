@@ -90,7 +90,8 @@ invariant violation or hidden exception.
 
 A second eval measures understanding rather than safety: 142 labelled utterances grounded in SGD, Taskmaster-1,
 CLINC150 and Hinglish-TOP, split dev/test. It moved the rule model from 45% to 98.5% strict accuracy on the
-held-out split, and from four confirm false positives to zero, and it gates the build.
+held-out split, and from four confirm false positives to zero. It is frozen as versioned golden v1 (regression,
+adversarial and a harder capability suite) with checksums, and gates the build.
 
 ## What breaks first at 100×, and what I'd change
 

@@ -1,5 +1,10 @@
 # Interpreter eval data: sources, method and licences
 
+The working drafts (`intents.jsonl`, `capability.jsonl`) are frozen into versioned golden sets under
+`golden/`. Golden v1 splits them into regression (130), adversarial (12) and capability (42) suites; see
+`golden/v1/RELEASE.md`. The capability rows are handwritten (MIT) from common real-world patterns; the Devanagari
+and Kannada-English rows need review by native speakers.
+
 `intents.jsonl` holds 142 labelled utterances for the interpreter, the one step where a model is in charge.
 Every row records its source, licence, original text or span, and how it was adapted.
 

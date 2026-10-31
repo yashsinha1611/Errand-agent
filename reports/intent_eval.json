@@ -1,97 +1,469 @@
 {
  "model": "rule-v1",
+ "golden": "v1",
  "summary": {
-  "all": {
-   "n": 142,
-   "kind_acc": 0.993,
-   "strict_acc": 0.993,
-   "confirm_fp_rate": 0.0,
-   "confirm_fp_count": 0,
-   "confirm_recall": 1.0,
-   "oos_false_action_rate": 0.0,
-   "fields": {
-    "area": 1.0,
-    "booking_ref": 1.0,
-    "budget_inr": 1.0,
-    "date_expr": 1.0,
-    "memory_key": 1.0,
-    "memory_op": 1.0,
-    "memory_value": 1.0,
-    "no_budget": 1.0,
-    "option_index": 1.0,
-    "provider_ref": 1.0,
-    "service": 1.0,
-    "task": 1.0,
-    "time_expr": 1.0
-   }
-  },
-  "dev": {
-   "n": 74,
-   "kind_acc": 1.0,
-   "strict_acc": 1.0,
-   "confirm_fp_rate": 0.0,
-   "confirm_fp_count": 0,
-   "confirm_recall": 1.0,
-   "oos_false_action_rate": 0.0,
-   "fields": {
-    "area": 1.0,
-    "budget_inr": 1.0,
-    "date_expr": 1.0,
-    "memory_key": 1.0,
-    "memory_op": 1.0,
-    "memory_value": 1.0,
-    "no_budget": 1.0,
-    "option_index": 1.0,
-    "provider_ref": 1.0,
-    "service": 1.0,
-    "task": 1.0,
-    "time_expr": 1.0
-   }
-  },
-  "test": {
-   "n": 68,
-   "kind_acc": 0.985,
-   "strict_acc": 0.985,
-   "confirm_fp_rate": 0.0,
-   "confirm_fp_count": 0,
-   "confirm_recall": 1.0,
-   "oos_false_action_rate": 0.0,
-   "fields": {
-    "area": 1.0,
-    "booking_ref": 1.0,
-    "budget_inr": 1.0,
-    "date_expr": 1.0,
-    "memory_op": 1.0,
-    "option_index": 1.0,
-    "provider_ref": 1.0,
-    "service": 1.0,
-    "task": 1.0,
-    "time_expr": 1.0
-   }
-  },
-  "by_source": {
+  "suites": {
    "adversarial": {
-    "n": 12,
-    "kind_acc": 0.917,
-    "strict_acc": 0.917,
+    "all": {
+     "n": 12,
+     "kind_acc": 0.917,
+     "strict_acc": 0.917,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": null,
+     "fields": {}
+    },
+    "dev": {
+     "n": 5,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": null,
+     "oos_false_action_rate": null,
+     "fields": {}
+    },
+    "test": {
+     "n": 7,
+     "kind_acc": 0.857,
+     "strict_acc": 0.857,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": null,
+     "fields": {}
+    },
+    "by_lang": {
+     "en": {
+      "n": 9,
+      "kind_acc": 0.889,
+      "strict_acc": 0.889,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": null,
+      "fields": {}
+     },
+     "hinglish": {
+      "n": 3,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": null,
+      "oos_false_action_rate": null,
+      "fields": {}
+     }
+    },
+    "by_source": {
+     "adversarial": {
+      "n": 12,
+      "kind_acc": 0.917,
+      "strict_acc": 0.917,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": null,
+      "fields": {}
+     }
+    }
+   },
+   "capability": {
+    "all": {
+     "n": 42,
+     "kind_acc": 0.619,
+     "strict_acc": 0.405,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 0.2,
+     "oos_false_action_rate": 0.5,
+     "fields": {
+      "area": 0.667,
+      "budget_inr": 0.0,
+      "date_expr": 0.579,
+      "no_budget": 1.0,
+      "provider_ref": 0.667,
+      "service": 0.778,
+      "task": 0.75,
+      "time_expr": 0.429
+     }
+    },
+    "dev": {
+     "n": 24,
+     "kind_acc": 0.667,
+     "strict_acc": 0.542,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 0.25,
+     "oos_false_action_rate": 0.0,
+     "fields": {
+      "area": 0.5,
+      "date_expr": 0.636,
+      "provider_ref": 1.0,
+      "service": 0.889,
+      "task": 0.818,
+      "time_expr": 0.625
+     }
+    },
+    "test": {
+     "n": 18,
+     "kind_acc": 0.556,
+     "strict_acc": 0.222,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 0.0,
+     "oos_false_action_rate": 1.0,
+     "fields": {
+      "area": 1.0,
+      "budget_inr": 0.0,
+      "date_expr": 0.5,
+      "no_budget": 1.0,
+      "provider_ref": 0.5,
+      "service": 0.667,
+      "task": 0.667,
+      "time_expr": 0.167
+     }
+    },
+    "by_lang": {
+     "en": {
+      "n": 32,
+      "kind_acc": 0.625,
+      "strict_acc": 0.406,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 0.333,
+      "oos_false_action_rate": 0.667,
+      "fields": {
+       "area": 0.5,
+       "budget_inr": 0.0,
+       "date_expr": 0.571,
+       "no_budget": 1.0,
+       "provider_ref": 0.667,
+       "service": 0.769,
+       "task": 0.733,
+       "time_expr": 0.444
+      }
+     },
+     "hindi": {
+      "n": 3,
+      "kind_acc": 0.0,
+      "strict_acc": 0.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 0.0,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "date_expr": 0.0,
+       "service": 0.0,
+       "task": 0.0,
+       "time_expr": 0.0
+      }
+     },
+     "hinglish": {
+      "n": 5,
+      "kind_acc": 1.0,
+      "strict_acc": 0.8,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": null,
+      "oos_false_action_rate": null,
+      "fields": {
+       "budget_inr": 0.0,
+       "date_expr": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 0.667
+      }
+     },
+     "kanglish": {
+      "n": 2,
+      "kind_acc": 0.5,
+      "strict_acc": 0.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 0.0,
+      "oos_false_action_rate": null,
+      "fields": {
+       "area": 1.0,
+       "date_expr": 0.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 0.0
+      }
+     }
+    },
+    "by_source": {
+     "capability": {
+      "n": 42,
+      "kind_acc": 0.619,
+      "strict_acc": 0.405,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 0.2,
+      "oos_false_action_rate": 0.5,
+      "fields": {
+       "area": 0.667,
+       "budget_inr": 0.0,
+       "date_expr": 0.579,
+       "no_budget": 1.0,
+       "provider_ref": 0.667,
+       "service": 0.778,
+       "task": 0.75,
+       "time_expr": 0.429
+      }
+     }
+    }
+   },
+   "regression": {
+    "all": {
+     "n": 130,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": 0.0,
+     "fields": {
+      "area": 1.0,
+      "booking_ref": 1.0,
+      "budget_inr": 1.0,
+      "date_expr": 1.0,
+      "memory_key": 1.0,
+      "memory_op": 1.0,
+      "memory_value": 1.0,
+      "no_budget": 1.0,
+      "option_index": 1.0,
+      "provider_ref": 1.0,
+      "service": 1.0,
+      "task": 1.0,
+      "time_expr": 1.0
+     }
+    },
+    "dev": {
+     "n": 69,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": 0.0,
+     "fields": {
+      "area": 1.0,
+      "budget_inr": 1.0,
+      "date_expr": 1.0,
+      "memory_key": 1.0,
+      "memory_op": 1.0,
+      "memory_value": 1.0,
+      "no_budget": 1.0,
+      "option_index": 1.0,
+      "provider_ref": 1.0,
+      "service": 1.0,
+      "task": 1.0,
+      "time_expr": 1.0
+     }
+    },
+    "test": {
+     "n": 61,
+     "kind_acc": 1.0,
+     "strict_acc": 1.0,
+     "confirm_fp_rate": 0.0,
+     "confirm_fp_count": 0,
+     "confirm_recall": 1.0,
+     "oos_false_action_rate": 0.0,
+     "fields": {
+      "area": 1.0,
+      "booking_ref": 1.0,
+      "budget_inr": 1.0,
+      "date_expr": 1.0,
+      "memory_op": 1.0,
+      "option_index": 1.0,
+      "provider_ref": 1.0,
+      "service": 1.0,
+      "task": 1.0,
+      "time_expr": 1.0
+     }
+    },
+    "by_lang": {
+     "en": {
+      "n": 76,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "area": 1.0,
+       "booking_ref": 1.0,
+       "budget_inr": 1.0,
+       "date_expr": 1.0,
+       "memory_key": 1.0,
+       "memory_op": 1.0,
+       "memory_value": 1.0,
+       "option_index": 1.0,
+       "provider_ref": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
+      }
+     },
+     "hinglish": {
+      "n": 54,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "area": 1.0,
+       "budget_inr": 1.0,
+       "date_expr": 1.0,
+       "memory_key": 1.0,
+       "memory_op": 1.0,
+       "memory_value": 1.0,
+       "no_budget": 1.0,
+       "option_index": 1.0,
+       "provider_ref": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
+      }
+     }
+    },
+    "by_source": {
+     "clinc150": {
+      "n": 21,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": null,
+      "oos_false_action_rate": 0.0,
+      "fields": {}
+     },
+     "handwritten": {
+      "n": 29,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "area": 1.0,
+       "budget_inr": 1.0,
+       "date_expr": 1.0,
+       "memory_key": 1.0,
+       "memory_op": 1.0,
+       "memory_value": 1.0,
+       "no_budget": 1.0,
+       "option_index": 1.0,
+       "provider_ref": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
+      }
+     },
+     "hinglish_top": {
+      "n": 25,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": null,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "area": 1.0,
+       "date_expr": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
+      }
+     },
+     "sgd": {
+      "n": 28,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": 1.0,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "area": 1.0,
+       "date_expr": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
+      }
+     },
+     "synthetic": {
+      "n": 19,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": null,
+      "oos_false_action_rate": 0.0,
+      "fields": {
+       "area": 1.0,
+       "booking_ref": 1.0,
+       "budget_inr": 1.0,
+       "date_expr": 1.0,
+       "memory_key": 1.0,
+       "memory_op": 1.0,
+       "memory_value": 1.0,
+       "option_index": 1.0,
+       "provider_ref": 1.0,
+       "service": 1.0,
+       "task": 1.0,
+       "time_expr": 1.0
+      }
+     },
+     "taskmaster1": {
+      "n": 8,
+      "kind_acc": 1.0,
+      "strict_acc": 1.0,
+      "confirm_fp_rate": 0.0,
+      "confirm_fp_count": 0,
+      "confirm_recall": null,
+      "oos_false_action_rate": null,
+      "fields": {
+       "date_expr": 1.0,
+       "time_expr": 1.0
+      }
+     }
+    }
+   }
+  },
+  "gated": {
+   "all": {
+    "n": 142,
+    "kind_acc": 0.993,
+    "strict_acc": 0.993,
     "confirm_fp_rate": 0.0,
     "confirm_fp_count": 0,
     "confirm_recall": 1.0,
     "oos_false_action_rate": 0.0,
-    "fields": {}
+    "fields": {
+     "area": 1.0,
+     "booking_ref": 1.0,
+     "budget_inr": 1.0,
+     "date_expr": 1.0,
+     "memory_key": 1.0,
+     "memory_op": 1.0,
+     "memory_value": 1.0,
+     "no_budget": 1.0,
+     "option_index": 1.0,
+     "provider_ref": 1.0,
+     "service": 1.0,
+     "task": 1.0,
+     "time_expr": 1.0
+    }
    },
-   "clinc150": {
-    "n": 21,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
-    "confirm_fp_rate": 0.0,
-    "confirm_fp_count": 0,
-    "confirm_recall": 0.0,
-    "oos_false_action_rate": 0.0,
-    "fields": {}
-   },
-   "handwritten": {
-    "n": 29,
+   "dev": {
+    "n": 74,
     "kind_acc": 1.0,
     "strict_acc": 1.0,
     "confirm_fp_rate": 0.0,
@@ -113,127 +485,34 @@
      "time_expr": 1.0
     }
    },
-   "hinglish_top": {
-    "n": 25,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
-    "confirm_fp_rate": 0.0,
-    "confirm_fp_count": 0,
-    "confirm_recall": 0.0,
-    "oos_false_action_rate": 0.0,
-    "fields": {
-     "area": 1.0,
-     "date_expr": 1.0,
-     "service": 1.0,
-     "task": 1.0,
-     "time_expr": 1.0
-    }
-   },
-   "sgd": {
-    "n": 28,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
+   "test": {
+    "n": 68,
+    "kind_acc": 0.985,
+    "strict_acc": 0.985,
     "confirm_fp_rate": 0.0,
     "confirm_fp_count": 0,
     "confirm_recall": 1.0,
     "oos_false_action_rate": 0.0,
     "fields": {
      "area": 1.0,
-     "date_expr": 1.0,
-     "service": 1.0,
-     "task": 1.0,
-     "time_expr": 1.0
-    }
-   },
-   "synthetic": {
-    "n": 19,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
-    "confirm_fp_rate": 0.0,
-    "confirm_fp_count": 0,
-    "confirm_recall": 0.0,
-    "oos_false_action_rate": 0.0,
-    "fields": {
-     "area": 1.0,
      "booking_ref": 1.0,
      "budget_inr": 1.0,
      "date_expr": 1.0,
-     "memory_key": 1.0,
      "memory_op": 1.0,
-     "memory_value": 1.0,
      "option_index": 1.0,
      "provider_ref": 1.0,
      "service": 1.0,
      "task": 1.0,
-     "time_expr": 1.0
-    }
-   },
-   "taskmaster1": {
-    "n": 8,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
-    "confirm_fp_rate": 0.0,
-    "confirm_fp_count": 0,
-    "confirm_recall": 0.0,
-    "oos_false_action_rate": 0.0,
-    "fields": {
-     "date_expr": 1.0,
      "time_expr": 1.0
     }
    }
   },
-  "by_lang": {
-   "en": {
-    "n": 85,
-    "kind_acc": 0.988,
-    "strict_acc": 0.988,
-    "confirm_fp_rate": 0.0,
-    "confirm_fp_count": 0,
-    "confirm_recall": 1.0,
-    "oos_false_action_rate": 0.0,
-    "fields": {
-     "area": 1.0,
-     "booking_ref": 1.0,
-     "budget_inr": 1.0,
-     "date_expr": 1.0,
-     "memory_key": 1.0,
-     "memory_op": 1.0,
-     "memory_value": 1.0,
-     "option_index": 1.0,
-     "provider_ref": 1.0,
-     "service": 1.0,
-     "task": 1.0,
-     "time_expr": 1.0
-    }
-   },
-   "hinglish": {
-    "n": 57,
-    "kind_acc": 1.0,
-    "strict_acc": 1.0,
-    "confirm_fp_rate": 0.0,
-    "confirm_fp_count": 0,
-    "confirm_recall": 1.0,
-    "oos_false_action_rate": 0.0,
-    "fields": {
-     "area": 1.0,
-     "budget_inr": 1.0,
-     "date_expr": 1.0,
-     "memory_key": 1.0,
-     "memory_op": 1.0,
-     "memory_value": 1.0,
-     "no_budget": 1.0,
-     "option_index": 1.0,
-     "provider_ref": 1.0,
-     "service": 1.0,
-     "task": 1.0,
-     "time_expr": 1.0
-    }
-   }
-  }
+  "confirm_fp_total": 0
  },
  "results": [
   {
    "id": "sgd-001",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -265,6 +544,7 @@
   },
   {
    "id": "sgd-002",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -293,6 +573,7 @@
   },
   {
    "id": "sgd-003",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -321,6 +602,7 @@
   },
   {
    "id": "sgd-004",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -349,6 +631,7 @@
   },
   {
    "id": "sgd-005",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -377,6 +660,7 @@
   },
   {
    "id": "sgd-006",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -402,6 +686,7 @@
   },
   {
    "id": "sgd-007",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -430,6 +715,7 @@
   },
   {
    "id": "sgd-008",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -455,6 +741,7 @@
   },
   {
    "id": "sgd-009",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -486,6 +773,7 @@
   },
   {
    "id": "sgd-010",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -514,6 +802,7 @@
   },
   {
    "id": "sgd-011",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -539,6 +828,7 @@
   },
   {
    "id": "sgd-012",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -564,6 +854,7 @@
   },
   {
    "id": "sgd-013",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -589,6 +880,7 @@
   },
   {
    "id": "sgd-014",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -620,6 +912,7 @@
   },
   {
    "id": "sgd-015",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -648,6 +941,7 @@
   },
   {
    "id": "sgd-016",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -676,6 +970,7 @@
   },
   {
    "id": "sgd-017",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -707,6 +1002,7 @@
   },
   {
    "id": "sgd-018",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -732,6 +1028,7 @@
   },
   {
    "id": "sgd-019",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -761,6 +1058,7 @@
   },
   {
    "id": "sgd-020",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -786,6 +1084,7 @@
   },
   {
    "id": "sgd-021",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -814,6 +1113,7 @@
   },
   {
    "id": "sgd-022",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -835,6 +1135,7 @@
   },
   {
    "id": "sgd-023",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -856,6 +1157,7 @@
   },
   {
    "id": "sgd-024",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -877,6 +1179,7 @@
   },
   {
    "id": "sgd-025",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -900,6 +1203,7 @@
   },
   {
    "id": "sgd-026",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -924,6 +1228,7 @@
   },
   {
    "id": "sgd-027",
+   "suite": "regression",
    "split": "test",
    "source": "sgd",
    "lang": "en",
@@ -955,6 +1260,7 @@
   },
   {
    "id": "sgd-028",
+   "suite": "regression",
    "split": "dev",
    "source": "sgd",
    "lang": "en",
@@ -986,6 +1292,7 @@
   },
   {
    "id": "taskmaster1-001",
+   "suite": "regression",
    "split": "dev",
    "source": "taskmaster1",
    "lang": "en",
@@ -1014,6 +1321,7 @@
   },
   {
    "id": "taskmaster1-002",
+   "suite": "regression",
    "split": "dev",
    "source": "taskmaster1",
    "lang": "en",
@@ -1039,6 +1347,7 @@
   },
   {
    "id": "taskmaster1-003",
+   "suite": "regression",
    "split": "test",
    "source": "taskmaster1",
    "lang": "en",
@@ -1067,6 +1376,7 @@
   },
   {
    "id": "taskmaster1-004",
+   "suite": "regression",
    "split": "dev",
    "source": "taskmaster1",
    "lang": "en",
@@ -1092,6 +1402,7 @@
   },
   {
    "id": "taskmaster1-005",
+   "suite": "regression",
    "split": "dev",
    "source": "taskmaster1",
    "lang": "en",
@@ -1117,6 +1428,7 @@
   },
   {
    "id": "taskmaster1-006",
+   "suite": "regression",
    "split": "test",
    "source": "taskmaster1",
    "lang": "en",
@@ -1142,6 +1454,7 @@
   },
   {
    "id": "taskmaster1-007",
+   "suite": "regression",
    "split": "test",
    "source": "taskmaster1",
    "lang": "en",
@@ -1167,6 +1480,7 @@
   },
   {
    "id": "taskmaster1-008",
+   "suite": "regression",
    "split": "dev",
    "source": "taskmaster1",
    "lang": "en",
@@ -1192,6 +1506,7 @@
   },
   {
    "id": "clinc150-001",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1218,6 +1533,7 @@
   },
   {
    "id": "clinc150-002",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1244,6 +1560,7 @@
   },
   {
    "id": "clinc150-003",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1270,6 +1587,7 @@
   },
   {
    "id": "clinc150-004",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1296,6 +1614,7 @@
   },
   {
    "id": "clinc150-005",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1322,6 +1641,7 @@
   },
   {
    "id": "clinc150-006",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1348,6 +1668,7 @@
   },
   {
    "id": "clinc150-007",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1374,6 +1695,7 @@
   },
   {
    "id": "clinc150-008",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1400,6 +1722,7 @@
   },
   {
    "id": "clinc150-009",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1426,6 +1749,7 @@
   },
   {
    "id": "clinc150-010",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1452,6 +1776,7 @@
   },
   {
    "id": "clinc150-011",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1478,6 +1803,7 @@
   },
   {
    "id": "clinc150-012",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1504,6 +1830,7 @@
   },
   {
    "id": "clinc150-013",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1530,6 +1857,7 @@
   },
   {
    "id": "clinc150-014",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1556,6 +1884,7 @@
   },
   {
    "id": "clinc150-015",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1582,6 +1911,7 @@
   },
   {
    "id": "clinc150-016",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1608,6 +1938,7 @@
   },
   {
    "id": "clinc150-017",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1634,6 +1965,7 @@
   },
   {
    "id": "clinc150-018",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1660,6 +1992,7 @@
   },
   {
    "id": "clinc150-019",
+   "suite": "regression",
    "split": "test",
    "source": "clinc150",
    "lang": "en",
@@ -1686,6 +2019,7 @@
   },
   {
    "id": "clinc150-020",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1712,6 +2046,7 @@
   },
   {
    "id": "clinc150-021",
+   "suite": "regression",
    "split": "dev",
    "source": "clinc150",
    "lang": "en",
@@ -1738,6 +2073,7 @@
   },
   {
    "id": "hinglish_top-001",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1769,6 +2105,7 @@
   },
   {
    "id": "hinglish_top-002",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1800,6 +2137,7 @@
   },
   {
    "id": "hinglish_top-003",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1834,6 +2172,7 @@
   },
   {
    "id": "hinglish_top-004",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1865,6 +2204,7 @@
   },
   {
    "id": "hinglish_top-005",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1899,6 +2239,7 @@
   },
   {
    "id": "hinglish_top-006",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1933,6 +2274,7 @@
   },
   {
    "id": "hinglish_top-007",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1967,6 +2309,7 @@
   },
   {
    "id": "hinglish_top-008",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -1998,6 +2341,7 @@
   },
   {
    "id": "hinglish_top-009",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2029,6 +2373,7 @@
   },
   {
    "id": "hinglish_top-010",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2060,6 +2405,7 @@
   },
   {
    "id": "hinglish_top-011",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2091,6 +2437,7 @@
   },
   {
    "id": "hinglish_top-012",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2117,6 +2464,7 @@
   },
   {
    "id": "hinglish_top-013",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2142,6 +2490,7 @@
   },
   {
    "id": "hinglish_top-014",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2170,6 +2519,7 @@
   },
   {
    "id": "hinglish_top-015",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2198,6 +2548,7 @@
   },
   {
    "id": "hinglish_top-016",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2235,6 +2586,7 @@
   },
   {
    "id": "hinglish_top-017",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2260,6 +2612,7 @@
   },
   {
    "id": "hinglish_top-018",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2294,6 +2647,7 @@
   },
   {
    "id": "hinglish_top-019",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2328,6 +2682,7 @@
   },
   {
    "id": "hinglish_top-020",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2354,6 +2709,7 @@
   },
   {
    "id": "hinglish_top-021",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2380,6 +2736,7 @@
   },
   {
    "id": "hinglish_top-022",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2406,6 +2763,7 @@
   },
   {
    "id": "hinglish_top-023",
+   "suite": "regression",
    "split": "dev",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2432,6 +2790,7 @@
   },
   {
    "id": "hinglish_top-024",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2458,6 +2817,7 @@
   },
   {
    "id": "hinglish_top-025",
+   "suite": "regression",
    "split": "test",
    "source": "hinglish_top",
    "lang": "hinglish",
@@ -2484,6 +2844,7 @@
   },
   {
    "id": "handwritten-001",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2524,6 +2885,7 @@
   },
   {
    "id": "handwritten-002",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2555,6 +2917,7 @@
   },
   {
    "id": "handwritten-003",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2583,6 +2946,7 @@
   },
   {
    "id": "handwritten-004",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2604,6 +2968,7 @@
   },
   {
    "id": "handwritten-005",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2625,6 +2990,7 @@
   },
   {
    "id": "handwritten-006",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2646,6 +3012,7 @@
   },
   {
    "id": "handwritten-007",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2667,6 +3034,7 @@
   },
   {
    "id": "handwritten-008",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2688,6 +3056,7 @@
   },
   {
    "id": "handwritten-009",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2709,6 +3078,7 @@
   },
   {
    "id": "handwritten-010",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2733,6 +3103,7 @@
   },
   {
    "id": "handwritten-011",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2758,6 +3129,7 @@
   },
   {
    "id": "handwritten-012",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2783,6 +3155,7 @@
   },
   {
    "id": "handwritten-013",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2811,6 +3184,7 @@
   },
   {
    "id": "handwritten-014",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2837,6 +3211,7 @@
   },
   {
    "id": "handwritten-015",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2862,6 +3237,7 @@
   },
   {
    "id": "handwritten-016",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2887,6 +3263,7 @@
   },
   {
    "id": "handwritten-017",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2912,6 +3289,7 @@
   },
   {
    "id": "handwritten-018",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2937,6 +3315,7 @@
   },
   {
    "id": "handwritten-019",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2965,6 +3344,7 @@
   },
   {
    "id": "handwritten-020",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -2990,6 +3370,7 @@
   },
   {
    "id": "handwritten-021",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3021,6 +3402,7 @@
   },
   {
    "id": "handwritten-022",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3049,6 +3431,7 @@
   },
   {
    "id": "handwritten-023",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3074,6 +3457,7 @@
   },
   {
    "id": "handwritten-024",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3099,6 +3483,7 @@
   },
   {
    "id": "handwritten-025",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3133,6 +3518,7 @@
   },
   {
    "id": "handwritten-026",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3161,6 +3547,7 @@
   },
   {
    "id": "handwritten-027",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3189,6 +3576,7 @@
   },
   {
    "id": "handwritten-028",
+   "suite": "regression",
    "split": "test",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3210,6 +3598,7 @@
   },
   {
    "id": "handwritten-029",
+   "suite": "regression",
    "split": "dev",
    "source": "handwritten",
    "lang": "hinglish",
@@ -3231,6 +3620,7 @@
   },
   {
    "id": "synthetic-001",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3271,6 +3661,7 @@
   },
   {
    "id": "synthetic-002",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3305,6 +3696,7 @@
   },
   {
    "id": "synthetic-003",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3329,6 +3721,7 @@
   },
   {
    "id": "synthetic-004",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3363,6 +3756,7 @@
   },
   {
    "id": "synthetic-005",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3391,6 +3785,7 @@
   },
   {
    "id": "synthetic-006",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3425,6 +3820,7 @@
   },
   {
    "id": "synthetic-007",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3456,6 +3852,7 @@
   },
   {
    "id": "synthetic-008",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3484,6 +3881,7 @@
   },
   {
    "id": "synthetic-009",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3515,6 +3913,7 @@
   },
   {
    "id": "synthetic-010",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3546,6 +3945,7 @@
   },
   {
    "id": "synthetic-011",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3580,6 +3980,7 @@
   },
   {
    "id": "synthetic-012",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3617,6 +4018,7 @@
   },
   {
    "id": "synthetic-013",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3638,6 +4040,7 @@
   },
   {
    "id": "synthetic-014",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3663,6 +4066,7 @@
   },
   {
    "id": "synthetic-015",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3689,6 +4093,7 @@
   },
   {
    "id": "synthetic-016",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3717,6 +4122,7 @@
   },
   {
    "id": "synthetic-017",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3742,6 +4148,7 @@
   },
   {
    "id": "synthetic-018",
+   "suite": "regression",
    "split": "test",
    "source": "synthetic",
    "lang": "en",
@@ -3770,6 +4177,7 @@
   },
   {
    "id": "synthetic-019",
+   "suite": "regression",
    "split": "dev",
    "source": "synthetic",
    "lang": "en",
@@ -3796,6 +4204,7 @@
   },
   {
    "id": "adversarial-001",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "en",
@@ -3823,6 +4232,7 @@
   },
   {
    "id": "adversarial-002",
+   "suite": "adversarial",
    "split": "dev",
    "source": "adversarial",
    "lang": "en",
@@ -3850,6 +4260,7 @@
   },
   {
    "id": "adversarial-003",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "en",
@@ -3877,6 +4288,7 @@
   },
   {
    "id": "adversarial-004",
+   "suite": "adversarial",
    "split": "dev",
    "source": "adversarial",
    "lang": "en",
@@ -3904,6 +4316,7 @@
   },
   {
    "id": "adversarial-005",
+   "suite": "adversarial",
    "split": "dev",
    "source": "adversarial",
    "lang": "en",
@@ -3931,6 +4344,7 @@
   },
   {
    "id": "adversarial-006",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "en",
@@ -3958,6 +4372,7 @@
   },
   {
    "id": "adversarial-007",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "en",
@@ -3979,6 +4394,7 @@
   },
   {
    "id": "adversarial-008",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "en",
@@ -4006,6 +4422,7 @@
   },
   {
    "id": "adversarial-009",
+   "suite": "adversarial",
    "split": "dev",
    "source": "adversarial",
    "lang": "en",
@@ -4032,6 +4449,7 @@
   },
   {
    "id": "adversarial-010",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "hinglish",
@@ -4059,6 +4477,7 @@
   },
   {
    "id": "adversarial-011",
+   "suite": "adversarial",
    "split": "dev",
    "source": "adversarial",
    "lang": "hinglish",
@@ -4086,6 +4505,7 @@
   },
   {
    "id": "adversarial-012",
+   "suite": "adversarial",
    "split": "test",
    "source": "adversarial",
    "lang": "hinglish",
@@ -4108,6 +4528,1210 @@
    "oos_false_action": false,
    "pred": {
     "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-001",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "umm hi so the kitchen tap has been dripping all night and i was wondering if someone could maybe come over tomorrow morning like before 11 if thats possible",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow",
+    "time_expr": [
+     "before:11:00",
+     "morning"
+    ]
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "date_expr": true,
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow",
+    "time_expr": "before:23:00"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-002",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "I was wondering whether it might be possible to arrange for somebody to take a look at our ceiling fan, it has been making a rattling noise",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-003",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "this coming Friday around ten thirty",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "weekday:fri",
+    "time_expr": "at:10:30"
+   },
+   "kind_ok": true,
+   "fields": {
+    "date_expr": true,
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "date_expr": "weekday:fri"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-004",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "the ac is not cooling at all and its 38 degrees",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "ac_servicing"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "ac_servicing"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-005",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "need plmbr 2mrw aftr 5 hsr",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "area": "HSR Layout",
+    "date_expr": "tomorrow",
+    "time_expr": "after:17:00"
+   },
+   "kind_ok": false,
+   "fields": {
+    "task": false,
+    "service": false,
+    "area": false,
+    "date_expr": false,
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-006",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "elec needed asap koramangala switchboard sparking",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician",
+    "area": "Koramangala",
+    "date_expr": "today"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "area": true,
+    "date_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician",
+    "area": "Koramangala",
+    "date_expr": "today"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-007",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "budget is like 800 bucks max",
+   "expected": {
+    "kind": "provide_details",
+    "budget_inr": 800
+   },
+   "kind_ok": false,
+   "fields": {
+    "budget_inr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-008",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "price doesn't matter just send the best one",
+   "expected": {
+    "kind": "provide_details",
+    "no_budget": true
+   },
+   "kind_ok": true,
+   "fields": {
+    "no_budget": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "no_budget": true
+   },
+   "error": null
+  },
+  {
+   "id": "capability-009",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "There's water dripping from the ceiling of the bathroom",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber"
+   },
+   "kind_ok": false,
+   "fields": {
+    "task": false,
+    "service": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-010",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "the switchboard in the hall gives a small shock when I touch it",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-011",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "can I get someone for termite treatment in my cupboard",
+   "expected": {
+    "kind": [
+     "unclear",
+     "greeting",
+     "decline",
+     "abort"
+    ]
+   },
+   "kind_ok": true,
+   "fields": {},
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": true,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-012",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "Tuesday, no wait, Wednesday morning works better",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "weekday:wed",
+    "time_expr": "morning"
+   },
+   "kind_ok": true,
+   "fields": {
+    "date_expr": false,
+    "time_expr": true
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "date_expr": "weekday:tue",
+    "time_expr": "morning"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-013",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "not on Saturday, any other day this week is fine",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "this_week"
+   },
+   "kind_ok": true,
+   "fields": {
+    "date_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "date_expr": "weekday:sat"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-014",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "end of the week, evening",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": [
+     "weekday:fri",
+     "weekend",
+     "this_week"
+    ],
+    "time_expr": "evening"
+   },
+   "kind_ok": true,
+   "fields": {
+    "date_expr": false,
+    "time_expr": true
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "time_expr": "evening"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-015",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "in about 2 hours if anyone's free",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "today"
+   },
+   "kind_ok": false,
+   "fields": {
+    "date_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-016",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "what's the earliest you can get someone here today",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "today"
+   },
+   "kind_ok": true,
+   "fields": {
+    "date_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "date_expr": "today"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-017",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "anyone available right now?",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "today"
+   },
+   "kind_ok": false,
+   "fields": {
+    "date_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-018",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "ok wait actually make it 4 not 3",
+   "expected": {
+    "kind": "provide_details",
+    "time_expr": "at:16:00"
+   },
+   "kind_ok": false,
+   "fields": {
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-019",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "sure, but can you make it 10 instead?",
+   "expected": {
+    "kind": "provide_details",
+    "time_expr": "at:10:00"
+   },
+   "kind_ok": false,
+   "fields": {
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-020",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "yes yes yes book it before it's gone!!",
+   "expected": {
+    "kind": "confirm"
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-021",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "👍",
+   "expected": {
+    "kind": "confirm"
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-022",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "ok",
+   "expected": {
+    "kind": "confirm"
+   },
+   "kind_ok": true,
+   "fields": {},
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "confirm"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-023",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "book a plumber tomorrow and also cancel my AC servicing",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": false,
+    "service": false,
+    "date_expr": true
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "cancel",
+    "service": "ac_servicing",
+    "date_expr": "tomorrow"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-024",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "I need an electrician and a plumber tomorrow",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": [
+     "electrician",
+     "plumber"
+    ],
+    "date_expr": "tomorrow"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "date_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-025",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "Same guy as last time for the AC please",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "ac_servicing",
+    "provider_ref": "last_time"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "provider_ref": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "ac_servicing",
+    "provider_ref": "last_time"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-026",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "same plumber as before but on sunday",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "provider_ref": "last_time",
+    "date_expr": "weekday:sun"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "date_expr": true,
+    "provider_ref": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "weekday:sun",
+    "provider_ref": "last_time"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-027",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "can you move it to the evening instead",
+   "expected": {
+    "kind": "start_task",
+    "task": "reschedule",
+    "time_expr": "evening"
+   },
+   "kind_ok": false,
+   "fields": {
+    "task": false,
+    "time_expr": true
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "time_expr": "evening",
+    "is_correction": true
+   },
+   "error": null
+  },
+  {
+   "id": "capability-028",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "cancel it",
+   "expected": {
+    "kind": "start_task",
+    "task": "cancel"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "cancel"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-029",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "can you book Ravi again, the electrician one, for saturday afternoon",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician",
+    "provider_ref": "Ravi",
+    "date_expr": "weekday:sat",
+    "time_expr": "afternoon"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "date_expr": true,
+    "time_expr": true,
+    "provider_ref": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "electrician",
+    "date_expr": "weekday:sat",
+    "time_expr": "afternoon"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-030",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "en",
+   "text": "pls dont send sharma plumbing again, anyone else is fine",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-031",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "remind me tomorrow to pay the plumber",
+   "expected": {
+    "kind": [
+     "unclear",
+     "greeting",
+     "decline",
+     "abort"
+    ]
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": true,
+   "oos_false_action": true,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-032",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "en",
+   "text": "Is it safe to let the cleaner in when I'm not home?",
+   "expected": {
+    "kind": [
+     "unclear",
+     "greeting",
+     "decline",
+     "abort"
+    ]
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": true,
+   "oos_false_action": true,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "cleaning"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-033",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "hinglish",
+   "text": "plumber chahiye but not before 11, budget around 1200 max",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "time_expr": "after:11:00",
+    "budget_inr": 1200
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "time_expr": false,
+    "budget_inr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-034",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "hinglish",
+   "text": "bhaiya kal shaam ko AC ka gas bharna hai",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "ac_servicing",
+    "date_expr": "tomorrow",
+    "time_expr": "evening"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "date_expr": true,
+    "time_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "ac_servicing",
+    "date_expr": "tomorrow",
+    "time_expr": "evening"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-035",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "hinglish",
+   "text": "safai wali didi ko parso bulana hai, 3 ghante ke liye",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "cleaning",
+    "date_expr": "day_after_tomorrow"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "date_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "cleaning",
+    "date_expr": "day_after_tomorrow"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-036",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "hinglish",
+   "text": "kal nahi, parso",
+   "expected": {
+    "kind": "provide_details",
+    "date_expr": "day_after_tomorrow"
+   },
+   "kind_ok": true,
+   "fields": {
+    "date_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "date_expr": "day_after_tomorrow"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-037",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "hinglish",
+   "text": "subah jaldi, 7 baje tak",
+   "expected": {
+    "kind": "provide_details",
+    "time_expr": "before:07:00"
+   },
+   "kind_ok": true,
+   "fields": {
+    "time_expr": true
+   },
+   "spurious": [],
+   "strict": true,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details",
+    "time_expr": "before:07:00"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-038",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "hindi",
+   "text": "कल सुबह प्लंबर चाहिए",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "date_expr": "tomorrow",
+    "time_expr": "morning"
+   },
+   "kind_ok": false,
+   "fields": {
+    "task": false,
+    "service": false,
+    "date_expr": false,
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-039",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "hindi",
+   "text": "हाँ, बुक कर दो",
+   "expected": {
+    "kind": "confirm"
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-040",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "hindi",
+   "text": "नहीं, अभी नहीं",
+   "expected": {
+    "kind": "decline"
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": true,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "unclear"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-041",
+   "suite": "capability",
+   "split": "test",
+   "source": "capability",
+   "lang": "kanglish",
+   "text": "naale beligge plumber beku Indiranagar alli",
+   "expected": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "area": "Indiranagar",
+    "date_expr": "tomorrow",
+    "time_expr": "morning"
+   },
+   "kind_ok": true,
+   "fields": {
+    "task": true,
+    "service": true,
+    "area": true,
+    "date_expr": false,
+    "time_expr": false
+   },
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "start_task",
+    "task": "book",
+    "service": "plumber",
+    "area": "Indiranagar"
+   },
+   "error": null
+  },
+  {
+   "id": "capability-042",
+   "suite": "capability",
+   "split": "dev",
+   "source": "capability",
+   "lang": "kanglish",
+   "text": "howdu, book maadi",
+   "expected": {
+    "kind": "confirm"
+   },
+   "kind_ok": false,
+   "fields": {},
+   "spurious": [],
+   "strict": false,
+   "confirm_fp": false,
+   "oos": false,
+   "oos_false_action": false,
+   "pred": {
+    "kind": "provide_details"
    },
    "error": null
   }

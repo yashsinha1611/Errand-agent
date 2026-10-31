@@ -10,7 +10,7 @@ library: nothing to install.
 ## Run it (three commands)
 
 ```bash
-make test     # unit tests, negative controls, fuzz, intent eval, 35 scenarios -> reports/
+make test     # unit tests, golden-set integrity, fuzz, intent eval, 35 scenarios -> reports/
 make demo     # web console with streaming chat and live trace: http://127.0.0.1:8765
 make chat     # the same agent in the terminal
 ```
@@ -43,25 +43,29 @@ No `make` (Windows): `python -m unittest discover -s tests -t . && python -m eva
 | End-to-end trace with timeout-after-success | [`docs/traces/timeout_after_success.jsonl`](docs/traces/timeout_after_success.jsonl); annotated in the design note |
 | Demo recording plan | [`docs/DEMO.md`](docs/DEMO.md) |
 
-## Is the model understanding people? (interpreter eval)
+## Is the model understanding people? (golden set and interpreter eval)
 
-The scenarios prove the system is safe whatever the model does. A separate eval measures how well the
-interpreter understands real phrasing: 142 labelled utterances grounded in public datasets (SGD, Taskmaster-1,
-CLINC150, Hinglish-TOP) plus handwritten Hinglish, synthetic and adversarial rows, split into dev and held-out
-test. Sources, method and licences: [`evals/data/SOURCES.md`](evals/data/SOURCES.md). Report:
+The scenarios prove the system is safe whatever the model does. A separate, versioned golden set measures how
+well the interpreter understands real phrasing. Golden **v1** is frozen with SHA-256 checksums; every eval run
+verifies them first, so an edited golden file fails loudly. Changes ship as a new version with a release note.
+
+| Suite | Rows | What it is | Gate | Rule model |
+| --- | --- | --- | --- | --- |
+| regression | 130 | Everyday phrasing grounded in SGD, Taskmaster-1, CLINC150 and Hinglish-TOP, plus handwritten Hinglish and two-step synthetic rows | test-split strict ≥ 95%, Hinglish ≥ 95%, out-of-scope actions ≤ 5% | 100% |
+| adversarial | 12 | Confirm traps and user-side injections, kept separate so accuracy can't hide a safety failure | zero false confirmations | 91.7%, 0 false confirmations |
+| capability | 42 | Harder phrasing: voice-style rambles, abbreviations, corrections, emoji, two requests, Devanagari, Kannada-English | tracked, not gated | 40.5% (headroom) |
+
+Baseline before the dev-driven parser fixes: 45% strict accuracy, 4 false confirmations, 41% of out-of-scope
+requests turned into actions. Release note: [`evals/data/golden/v1/RELEASE.md`](evals/data/golden/v1/RELEASE.md);
+provenance and licences: [`evals/data/SOURCES.md`](evals/data/SOURCES.md); report:
 [`reports/intent_eval.md`](reports/intent_eval.md).
 
-| Rule model | Before (baseline) | After dev-driven fixes |
-| --- | --- | --- |
-| Strict accuracy, all | 45.1% | 99.3% |
-| Strict accuracy, held-out test | 42.6% | 98.5% |
-| Strict accuracy, Hinglish | 33.3% | 100% |
-| Confirm false positives (safety) | 4 | 0 |
-| Out-of-scope requests turned into actions | 40.6% | 0% |
+**Second labeller.** `make review-sheet` writes `review_sheet.csv`; the guide is
+[`evals/data/golden/v1/REVIEW.md`](evals/data/golden/v1/REVIEW.md). `make agreement` then reports raw agreement,
+Cohen's kappa and the rows to adjudicate.
 
-The safety gates (zero confirm false positives, at most 5% out-of-scope actions, at least 95% held-out accuracy)
-run in `make test`. To measure Claude: `ANTHROPIC_API_KEY=… make intent-eval MODEL=claude RECORD=1` records its
-outputs to `evals/fixtures/claude/`; `make intent-eval MODEL=recorded` then replays them offline.
+**Live model.** `ANTHROPIC_API_KEY=… make intent-eval MODEL=claude RECORD=1` scores Claude on all three suites and
+records its outputs; `make intent-eval MODEL=recorded` replays them offline.
 
 **Hinglish.** The agent understands Hindi-English code-mixed requests ("kal subah plumber chahiye Indiranagar
 mein, 1500 se kam", "pehla wala", "haan book kar do"), in both the rule model and the Claude prompt. Replies stay
