@@ -5,8 +5,8 @@ Check with `python3 --version` (macOS/Linux) or `python --version` (Windows).
 
 ## 1. Get the code
 
-Unzip `errand-agent.zip` (or clone the repo) and open a terminal in the `errand-agent` folder. All commands below
-run from there.
+Unzip the submission zip (or clone the repo) and open a terminal in the `errand-agent` folder. All commands
+below run from there.
 
 ## 2. Run the tests (offline, about 10 seconds)
 
@@ -15,7 +15,7 @@ run from there.
 | `make test` | `python -m unittest discover -s tests -t .` then `python -m evals.intent_eval` then `python -m evals.run` |
 
 You should see `OK` for the unit tests, the three golden suites with zero confirm false positives, and
-`35/35 scenarios passed`. Reports land in `reports/`: `eval_table.md` (scenarios) and `intent_eval.md`
+`42/42 scenarios passed`. Reports land in `reports/`: `eval_table.md` (scenarios) and `intent_eval.md`
 (interpreter).
 
 ## 3. Run the console offline (no API key)
@@ -24,11 +24,80 @@ You should see `OK` for the unit tests, the three golden suites with zero confir
 | --- | --- |
 | `make demo` | `python -m errand serve` |
 
-Open <http://127.0.0.1:8765>. The header shows **Offline rule model**. Try the example chips, or type your own,
-in English or Hinglish. Data is kept in `var/`; delete that folder, or use **Faults → Reset world**, to start fresh.
+Open <http://127.0.0.1:8765>. The header shows **Offline rule model** (or the Claude model, see section 4).
+Data is kept in `var/`; delete that folder, or use **Faults → Reset world**, to start fresh.
 
-`make chat` (`python -m errand chat`) runs the same agent in the terminal; type `/help` for commands such as
-`/fault book_timeout_booked` or `/clock 11`.
+### Using the console
+
+The left side is the chat; the right side shows what the agent is doing, live.
+
+| Part | What it shows |
+| --- | --- |
+| Chat | Your messages and the agent's replies. Each reply lists the steps it took (search, hold, book, verify) with timings. Example chips under the input are one-click messages |
+| Option buttons | Providers with slot, price and rating. Click one, or type "Option 2" |
+| Approval card | The exact action, provider, slot and price, plus a short fingerprint. **Book it for ₹…** approves, **Don't book** declines. Nothing is written until you approve |
+| Trace tab | Every event of the run: state transitions, model calls (tokens, cost, latency), tool calls (args, result, latency), approvals, outbox, errors. Click a row for its details |
+| State tab | The workflow state: phase, every known detail and where it came from (you, memory or history) |
+| Memory tab | Saved preferences, marked *stated* or *inferred*; inferred ones wait for your yes |
+| Outbox tab | Every write the agent has sent and its status (SENT → CONFIRMED) |
+| Faults tab | Arm a failure for the next matching call (timeout after success, slot taken, price change, crash, search error), move the agent clock, clear faults, or reset the world |
+
+A five-minute tour:
+
+1. **A full booking:** click the chip *Find a plumber for my kitchen tap this week, mornings only, under ₹1,500*,
+   answer *Indiranagar* when asked for the area, pick an option, then **Book it**. Watch Trace: hold → approval
+   grant → consume → outbox → book → status check.
+2. **Prompt injection:** ask *What do people say about Sharma Plumbing?* The hostile review is shown as data
+   (expand **Screening review text**); Trace shows `injection_suspected`; State, Memory and approvals don't change.
+3. **Timeout after success:** start another booking, then in **Faults** arm *Next booking times out after it has
+   succeeded* and approve. The agent checks the booking's status instead of retrying, and books exactly once.
+4. **Memory:** say *remember Indiranagar as my area*, then *what do you remember about me?*, then *forget my area*.
+5. **A restart mid-booking:** arm *Kill the agent right after it sends a booking* and approve. The server process
+   really exits and restarts; the console reconnects and the agent reconciles the booking before anything else.
+
+### Using the terminal chat
+
+`make chat` (Windows: `python -m errand chat`) runs the same agent in the terminal. Each reply prints the steps
+the agent took, then the reply, the options and any approval. Type messages as in the console; reply `yes` or
+`no` to an approval.
+
+| Command | What it does |
+| --- | --- |
+| `/help` | List the commands |
+| `/faults` | List the failures you can arm, and what is armed now |
+| `/fault <id>` | Arm one, e.g. `/fault book_timeout_booked`, `/fault book_slot_taken`, `/fault hold_price_up`, `/fault crash_after_book_sent` |
+| `/clock <minutes>` | Move the agent's clock forward (default 11, enough to expire a 10-minute hold) |
+| `/memory` | Show saved preferences |
+| `/state` | Show the workflow state as JSON |
+| `/trace` | Print the path of this session's trace file (JSONL) |
+| `/new` | Start a new session (memory is kept) |
+| `/reset` | Wipe bookings, memory and sessions |
+| `/quit` | Exit |
+
+Example (real output; your dates and times will differ):
+
+```
+you> I need a plumber in Indiranagar tomorrow morning under 1500
+  ✓ Understood: book a plumber 7 ms
+  ✓ 4 found. 4 fit your time and budget 1 ms
+
+Three plumbers have morning slots tomorrow under ₹1,500. Pick one:
+  1. Ravi Plumbing (4.7 rating, 212 jobs): Sun 1 Nov, 10:00, ₹1,200
+  2. Kumar & Sons Plumbing (4.5 rating, 98 jobs): Sun 1 Nov, 08:00, ₹1,100
+  3. Sharma Plumbing (4.4 rating, 143 jobs): Sun 1 Nov, 10:00, ₹1,250
+
+you> 1
+  ✓ Understood: option 1 3 ms
+  ✓ Held at ₹1,200, same as listed 2 ms
+
+  Approve: book Ravi Plumbing, Sun 1 Nov, 10:00–11:00, ₹1,200  (approval ap_AQPQH90F, fingerprint bcb9e9)
+  Reply “yes” to approve or “no” to decline.
+
+you> yes
+  ✓ Approval matches the provider, slot and price 1 ms
+  ✓ The provider accepted the booking 2 ms
+  ✓ Status: booked, B-2041 0 ms
+```
 
 ## 4. Run it with Claude
 

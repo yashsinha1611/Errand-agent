@@ -70,6 +70,20 @@ class AfterBookingTest(unittest.TestCase):
             self.assertFalse(run("S41"))
 
 
+class DeadlineTest(unittest.TestCase):
+    def test_before_a_weekday_said_on_that_weekday_means_the_next_one(self):
+        # Bug: on a Saturday, "before Saturday" resolved to "before today": a window of today only.
+        from datetime import datetime, timedelta, timezone
+        from errand.timeparse import resolve_date
+        ist = timezone(timedelta(hours=5, minutes=30))
+        sat = datetime(2026, 10, 31, 9, 0, tzinfo=ist)
+        self.assertEqual(resolve_date("before:weekday:sat", sat)[:2], ("2026-10-31", "2026-11-06"))
+        mon = datetime(2026, 11, 2, 9, 0, tzinfo=ist)  # an ordinary weekday is unchanged
+        self.assertEqual(resolve_date("before:weekday:sat", mon)[:2], ("2026-11-02", "2026-11-06"))
+        thu = datetime(2026, 11, 5, 9, 0, tzinfo=ist)  # the day before the deadline: just today
+        self.assertEqual(resolve_date("before:weekday:fri", thu)[:2], ("2026-11-05", "2026-11-05"))
+
+
 class RecordedReplayTest(unittest.TestCase):
     def test_record_replay_and_stale_detection(self):
         from evals import recorded

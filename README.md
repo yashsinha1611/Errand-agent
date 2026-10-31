@@ -15,8 +15,11 @@ make demo     # web console with streaming chat and live trace: http://127.0.0.1
 make chat     # the same agent in the terminal
 ```
 
-Python 3.11+ only; nothing to install. **Step-by-step guide, including Windows, Claude and troubleshooting:
-[`docs/RUNNING.md`](docs/RUNNING.md).** To use Claude, put `ANTHROPIC_API_KEY=…` in a `.env` file (git-ignored)
+Without `make` (Windows): `python -m unittest discover -s tests -t .` and `python -m evals.run` for the tests,
+`python -m errand serve` for the console, `python -m errand chat` for the terminal.
+
+Python 3.11+ only; nothing to install. **Step-by-step guide, including how to use the console and the terminal
+chat, Windows, Claude and troubleshooting: [`docs/RUNNING.md`](docs/RUNNING.md).** To use Claude, put `ANTHROPIC_API_KEY=…` in a `.env` file (git-ignored)
 or export it; without a key the offline rule model is used, and tests never call a network. To put it online
 on AWS (Lightsail or EC2, HTTPS and a password in front, one setup script): [`docs/DEPLOY_AWS.md`](docs/DEPLOY_AWS.md).
 To test every feature and guardrail with Claude (`make check-llm`, `make live-scenarios`, and a hands-on script):

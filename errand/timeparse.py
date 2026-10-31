@@ -19,7 +19,10 @@ def resolve_date(expr: str, now: datetime) -> tuple[str, str, str]:
     today = now.date()
     if expr.startswith("before:"):
         # A deadline ("before Thursday", "Diwali se pehle"): any day from today until the day before it.
-        target = date.fromisoformat(resolve_date(expr.split(":", 1)[1], now)[0])
+        inner = expr.split(":", 1)[1]
+        target = date.fromisoformat(resolve_date(inner, now)[0])
+        if inner.startswith("weekday:") and target <= today:
+            target += timedelta(days=7)  # "before Saturday" said on a Saturday means the next one
         end = max(today, target - timedelta(days=1))
         t = datetime(target.year, target.month, target.day)
         return today.isoformat(), end.isoformat(), f"before {fmt_day(t)}"
