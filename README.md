@@ -17,7 +17,8 @@ make chat     # the same agent in the terminal
 
 Python 3.11+ only; nothing to install. **Step-by-step guide, including Windows, Claude and troubleshooting:
 [`docs/RUNNING.md`](docs/RUNNING.md).** To use Claude, put `ANTHROPIC_API_KEY=…` in a `.env` file (git-ignored)
-or export it; without a key the offline rule model is used, and tests never call a network.
+or export it; without a key the offline rule model is used, and tests never call a network. To put it online
+on AWS (Lightsail or EC2, HTTPS and a password in front, one setup script): [`docs/DEPLOY_AWS.md`](docs/DEPLOY_AWS.md).
 
 ## Where each must-have is enforced and proven
 
