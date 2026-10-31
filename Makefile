@@ -1,6 +1,6 @@
 PY ?= python3
 
-.PHONY: test demo chat evals clean intent-eval golden-verify review-sheet agreement
+.PHONY: test demo chat evals clean intent-eval golden-verify review-sheet agreement check-llm live-scenarios
 
 test:            ## unit tests, negative controls, fuzz, intent eval and 35 scenarios -> reports/
 	$(PY) -m unittest discover -s tests -t . && $(PY) -m evals.intent_eval && $(PY) -m evals.run
@@ -28,3 +28,9 @@ review-sheet:    ## CSV for a second labeller
 
 agreement:       ## agreement and Cohen's kappa from a filled review sheet
 	$(PY) -m evals.golden agreement evals/data/golden/v1/review_sheet.csv
+
+check-llm:       ## preflight: three probes against the live model (needs ANTHROPIC_API_KEY)
+	$(PY) -m errand check-llm
+
+live-scenarios:  ## all 35 scenarios with Claude reading every message, TRIALS times each (default 3)
+	$(PY) -m evals.live --trials $(or $(TRIALS),3) $(if $(ONLY),--only $(ONLY),)

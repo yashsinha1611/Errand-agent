@@ -65,7 +65,13 @@ is capped at $0.50 (`errand/config.py`).
 **Using another model.** Set `ERRAND_MODEL`, for example `claude-sonnet-5-5`. Add its price to
 `MODEL_PRICES_PER_MTOK` in `errand/config.py` so the trace reports cost.
 
-## 5. Measure Claude on the golden set
+## 5. Test everything with Claude
+
+Run `make check-llm` first (three probes, no fallback, clear error hints). Then follow
+[`docs/TESTING.md`](TESTING.md): automated checks (`make intent-eval MODEL=claude RECORD=1`,
+`make live-scenarios`) and a hands-on script covering every feature, guardrail and injection.
+
+## 6. Measure Claude on the golden set
 
 ```
 make intent-eval MODEL=claude RECORD=1        # Windows: python -m evals.intent_eval --model claude --record
@@ -82,7 +88,7 @@ Commit the fixtures if you want CI to check Claude's answers without a key. Add 
 next to the rule model's: regression, adversarial (confirm false positives must be 0) and capability, where
 Claude should clearly beat the rule model on Devanagari, Kannada-English and messy phrasing.
 
-## 6. Record the demo
+## 7. Record the demo
 
 Follow `docs/DEMO.md`. Start with **Faults → Reset world** so booking ids begin at B-2041, keep the Trace tab
 visible, and put a terminal next to the browser for the crash step: the process really exits and the

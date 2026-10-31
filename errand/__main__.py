@@ -1,4 +1,4 @@
-"""python -m errand [serve|chat|evals]"""
+"""python -m errand [serve|chat|evals|check-llm]"""
 from __future__ import annotations
 
 import argparse
@@ -17,6 +17,7 @@ def main() -> int:
     c = sub.add_parser("chat", help="terminal chat")
     c.add_argument("--slow", action="store_true", help="simulate provider latency")
     sub.add_parser("evals", help="run eval scenarios and write reports/eval_table.md")
+    sub.add_parser("check-llm", help="preflight: three probes against the live model, no fallback")
     args = parser.parse_args()
 
     if args.cmd == "serve":
@@ -30,6 +31,9 @@ def main() -> int:
         from .cli import main as chat
         chat(1.0 if args.slow else 0.0)
         return 0
+    if args.cmd == "check-llm":
+        from .check import main as check
+        return check()
     if args.cmd == "evals":
         from evals.run import main as run
         return run()
