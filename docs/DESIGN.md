@@ -4,7 +4,8 @@
 else. A deterministic workflow owns state, every provider call goes through one client, and every write passes
 an approval gate, an outbox and a status check. The model never sees a write tool, so it cannot be talked into
 using one. This is the plan-then-execute pattern from *Design Patterns for Securing LLM Agents against Prompt
-Injections* (Beurer-Kellner et al., 2025): untrusted text can never choose an action.
+Injections* (Beurer-Kellner et al., 2025): untrusted text can never choose an action. Reviews never reach the
+model, and provider names reach it only as neutral labels when they look like instructions (S42).
 
 ```
 message → Interpreter (LLM or rule model) → Intent → AgentService ──→ ApprovalGate (CAS on fingerprint)
@@ -22,7 +23,8 @@ service, area and date are required; time and budget are asked once and "no pref
 so a known fact is never asked again. A correction is a patch: `policy.apply_details` changes only the named
 slots and `policy.invalidations` decides what that voids downstream (a new date voids offers, hold and approval;
 a new budget only re-filters offers). A second request in the same message is queued and offered next, never
-dropped; ruled-out providers are a slot that filters offers.
+dropped; ruled-out providers are a slot that filters offers. Once a booking is done, a detail change ("make it
+Wednesday") never silently starts a second booking: the agent asks once, move it or book another (S41).
 
 ## Approval enforcement
 
@@ -81,8 +83,9 @@ Exactly one `book` call; the provider's own records show one booking with that k
 
 ## Evals
 
-40 scenarios grade end state (bookings, approval, outbox and memory rows), not wording; ten invariants run after
-each, negative controls prove they bite, and a seeded fuzz adds crashes and clock jumps. A versioned golden set
+42 scenarios grade end state (bookings, approval, outbox and memory rows), not wording; ten invariants run after
+each, negative controls prove they bite, and a seeded fuzz adds crashes and clock jumps. The same scenarios
+replay offline from recorded Claude outputs (`make evals-recorded`); a changed prompt marks them stale. A versioned golden set
 (184 labelled utterances from SGD, Taskmaster-1, CLINC150, Hinglish-TOP and handwritten rows) gates understanding,
 with zero false confirmations required. See README for live-model results.
 
