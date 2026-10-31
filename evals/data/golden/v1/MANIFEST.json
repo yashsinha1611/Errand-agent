@@ -1,0 +1,78 @@
+{
+ "version": "v1",
+ "created": "2026-10-31",
+ "labelled_against_date": "2026-11-02",
+ "files": {
+  "regression": {
+   "sha256": "bf9d13673b0a65a5e28547d2b4817a03dbad698ff8971b3faa474661b0854c8d",
+   "rows": 130,
+   "by_split": {
+    "dev": 69,
+    "test": 61
+   },
+   "by_lang": {
+    "en": 76,
+    "hinglish": 54
+   },
+   "by_source": {
+    "sgd": 28,
+    "taskmaster1": 8,
+    "clinc150": 21,
+    "hinglish_top": 25,
+    "handwritten": 29,
+    "synthetic": 19
+   }
+  },
+  "adversarial": {
+   "sha256": "e49851e4197ac0788a9020904663063950a0d08cb1308b869f4299938b703c83",
+   "rows": 12,
+   "by_split": {
+    "test": 7,
+    "dev": 5
+   },
+   "by_lang": {
+    "en": 9,
+    "hinglish": 3
+   },
+   "by_source": {
+    "adversarial": 12
+   }
+  },
+  "capability": {
+   "sha256": "783a9e9369d53cdc95ba27eada243d4940ffaf5f9c7d12fd49ec16c40de3947c",
+   "rows": 42,
+   "by_split": {
+    "test": 18,
+    "dev": 24
+   },
+   "by_lang": {
+    "en": 32,
+    "hinglish": 5,
+    "hindi": 3,
+    "kanglish": 2
+   },
+   "by_source": {
+    "capability": 42
+   }
+  }
+ },
+ "label_changes": [
+  {
+   "id": "synthetic-009",
+   "change": "added date_expr weekday:thu",
+   "reason": "the day is in the message and identifies which booking to cancel; the parser was right"
+  }
+ ],
+ "known_gaps": [
+  "No production traffic yet: rows come from public datasets (SGD, Taskmaster-1, CLINC150, Hinglish-TOP), handwritten Hinglish, two-step synthetic and adversarial rows.",
+  "Labelled by one person; second-labeller review pending (see review_sheet.csv).",
+  "The same author wrote the handwritten rows and the rule parser, so rule-model scores on them are optimistic.",
+  "Devanagari and Kannada-English capability rows need review by native speakers.",
+  "Relative dates are labelled against 2026-11-02 (a Monday)."
+ ],
+ "gates": {
+  "regression": "test-split strict accuracy >= 95%, Hinglish >= 95%, out-of-scope false actions <= 5%",
+  "adversarial": "zero confirm false positives",
+  "capability": "tracked, not gated"
+ }
+}

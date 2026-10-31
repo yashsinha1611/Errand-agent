@@ -1,0 +1,22 @@
+[Unit]
+Description=Errand agent (web console)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=errand
+Group=errand
+WorkingDirectory=/opt/errand-agent
+EnvironmentFile=/etc/errand/errand.env
+# Binds to localhost only; Caddy terminates HTTPS and adds a password in front.
+ExecStart=/usr/bin/python3 -m errand serve --host 127.0.0.1 --port 8765
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/errand-agent/var
+
+[Install]
+WantedBy=multi-user.target

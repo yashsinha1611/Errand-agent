@@ -1,0 +1,9 @@
+[project]
+name = "errand-agent"
+version = "1.0.0"
+description = "Home-services booking agent: never double-books, never acts without approval, never takes orders from a review."
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.ruff]
+line-length = 120
